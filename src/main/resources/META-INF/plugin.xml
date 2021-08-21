@@ -1,0 +1,11 @@
+<idea-plugin>
+  <id>com.chylex.intellij.keyboardmaster.KeyboardMaster</id>
+  <name>Keyboard Master</name>
+  <vendor url="https://chylex.com">chylex</vendor>
+  
+  <description><![CDATA[
+    Collection of keyboard-centric additions.
+  ]]></description>
+  
+  <depends>com.intellij.modules.platform</depends>
+</idea-plugin>
