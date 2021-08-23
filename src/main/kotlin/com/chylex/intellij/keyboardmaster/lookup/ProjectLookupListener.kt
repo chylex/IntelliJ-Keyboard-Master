@@ -11,8 +11,24 @@ import com.intellij.openapi.util.Key
  */
 class ProjectLookupListener : LookupManagerListener {
 	companion object {
+		private val OFFSET_KEY = Key.create<Int>("chylexKeyboardMasterOffset")
 		private val IS_MODIFIED_KEY = Key.create<Boolean>("chylexKeyboardMasterModified")
-		private val HINT_TEXT = Array(10) { " [${(it + 1) % 10}]" }
+		
+		private val HINT_TEXT = Array(9) { " [${it + 1}]" }
+		
+		fun getLookupOffset(lookup: LookupImpl): Int {
+			val offset = lookup.getUserData(OFFSET_KEY)
+			if (offset == null || offset >= lookup.list.model.size) {
+				return 0
+			}
+			else {
+				return offset
+			}
+		}
+		
+		fun setLookupOffset(lookup: LookupImpl, newOffset: Int) {
+			lookup.putUserData(OFFSET_KEY, newOffset)
+		}
 	}
 	
 	override fun activeLookupChanged(oldLookup: Lookup?, newLookup: Lookup?) {
@@ -24,13 +40,20 @@ class ProjectLookupListener : LookupManagerListener {
 		
 		@Suppress("UnstableApiUsage")
 		newLookup.addPresentationCustomizer { item, presentation ->
-			val items = newLookup.list.model
+			val itemList = newLookup.list.model
+			val itemCount = itemList.size
+			val offset = getLookupOffset(newLookup)
 			
-			for (index in 0 until items.size.coerceAtMost(10)) {
-				if (item === items.getElementAt(index)) {
+			for (digitIndex in 0 until 9) {
+				val itemIndex = offset + digitIndex
+				if (itemIndex >= itemCount) {
+					break
+				}
+				
+				if (item === itemList.getElementAt(itemIndex)) {
 					val customized = LookupElementPresentation()
 					customized.copyFrom(presentation)
-					customized.appendTailTextItalic(HINT_TEXT[index], true)
+					customized.appendTailTextItalic(HINT_TEXT[digitIndex], true)
 					return@addPresentationCustomizer customized
 				}
 			}
