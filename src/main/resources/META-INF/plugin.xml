@@ -6,7 +6,7 @@
   <description><![CDATA[
     Collection of keyboard-centric additions.
     <ul>
-      <li>Code completion items can be jumped to using numbers.</li>
+      <li>Code completion items can be jumped to using customizable characters (numbers by default).</li>
     </ul>
   ]]></description>
   
@@ -17,6 +17,8 @@
   </projectListeners>
   
   <extensions defaultExtensionNs="com.intellij">
+    <applicationService serviceImplementation="com.chylex.intellij.keyboardmaster.configuration.PluginConfiguration" />
+    <applicationConfigurable parentId="tools" instance="com.chylex.intellij.keyboardmaster.configuration.PluginConfigurable" id="com.chylex.keyboardmaster" />
     <!--suppress PluginXmlValidity, PluginXmlDynamicPlugin -->
     <editorTypedHandler implementationClass="com.chylex.intellij.keyboardmaster.lookup.LookupTypedActionHandler" />
   </extensions>

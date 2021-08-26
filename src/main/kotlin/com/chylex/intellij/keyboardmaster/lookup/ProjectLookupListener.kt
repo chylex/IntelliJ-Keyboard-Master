@@ -1,5 +1,6 @@
 package com.chylex.intellij.keyboardmaster.lookup
 
+import com.chylex.intellij.keyboardmaster.configuration.PluginConfiguration
 import com.intellij.codeInsight.lookup.Lookup
 import com.intellij.codeInsight.lookup.LookupElementPresentation
 import com.intellij.codeInsight.lookup.LookupManagerListener
@@ -13,8 +14,6 @@ class ProjectLookupListener : LookupManagerListener {
 	companion object {
 		private val OFFSET_KEY = Key.create<Int>("chylexKeyboardMasterOffset")
 		private val IS_MODIFIED_KEY = Key.create<Boolean>("chylexKeyboardMasterModified")
-		
-		private val HINT_TEXT = Array(9) { " [${it + 1}]" }
 		
 		fun getLookupOffset(lookup: LookupImpl): Int {
 			val offset = lookup.getUserData(OFFSET_KEY)
@@ -44,17 +43,20 @@ class ProjectLookupListener : LookupManagerListener {
 			val itemCount = itemList.size
 			val offset = getLookupOffset(newLookup)
 			
-			for (digitIndex in 0 until 9) {
-				val itemIndex = offset + digitIndex
+			for (index in 0 until 9) {
+				val itemIndex = offset + index
 				if (itemIndex >= itemCount) {
 					break
 				}
 				
 				if (item === itemList.getElementAt(itemIndex)) {
-					val customized = LookupElementPresentation()
-					customized.copyFrom(presentation)
-					customized.appendTailTextItalic(HINT_TEXT[digitIndex], true)
-					return@addPresentationCustomizer customized
+					val hint = PluginConfiguration.hintText[index]
+					if (hint != "") {
+						val customized = LookupElementPresentation()
+						customized.copyFrom(presentation)
+						customized.appendTailTextItalic(hint, true)
+						return@addPresentationCustomizer customized
+					}
 				}
 			}
 			

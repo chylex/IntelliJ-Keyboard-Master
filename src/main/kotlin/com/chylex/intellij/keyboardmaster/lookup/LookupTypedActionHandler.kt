@@ -1,5 +1,6 @@
 package com.chylex.intellij.keyboardmaster.lookup
 
+import com.chylex.intellij.keyboardmaster.configuration.PluginConfiguration
 import com.intellij.codeInsight.lookup.LookupManager
 import com.intellij.codeInsight.lookup.impl.LookupImpl
 import com.intellij.codeInsight.template.impl.editorActions.TypedActionHandlerBase
@@ -20,7 +21,8 @@ class LookupTypedActionHandler(originalHandler: TypedActionHandler?) : TypedActi
 	}
 	
 	private fun executeImpl(editor: Editor, charTyped: Char): Boolean {
-		if (charTyped !in '0'..'9') {
+		val mappedIndex = PluginConfiguration.charToIndexMap[charTyped.code]
+		if (mappedIndex == -1) {
 			return false
 		}
 		
@@ -31,7 +33,7 @@ class LookupTypedActionHandler(originalHandler: TypedActionHandler?) : TypedActi
 		
 		val offset = ProjectLookupListener.getLookupOffset(lookup)
 		
-		if (charTyped == '0') {
+		if (mappedIndex == 0) {
 			val list = lookup.list
 			val itemCount = list.model.size
 			val topIndex = (offset + 9).let { if (it >= itemCount) 0 else it }
@@ -43,7 +45,7 @@ class LookupTypedActionHandler(originalHandler: TypedActionHandler?) : TypedActi
 			lookup.refreshUi(false, true)
 		}
 		else {
-			lookup.selectedIndex = offset + (charTyped - '1')
+			lookup.selectedIndex = offset + mappedIndex - 1
 		}
 		
 		return true
