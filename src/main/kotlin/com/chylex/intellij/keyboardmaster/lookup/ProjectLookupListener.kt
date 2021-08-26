@@ -6,6 +6,7 @@ import com.intellij.codeInsight.lookup.LookupElementPresentation
 import com.intellij.codeInsight.lookup.LookupManagerListener
 import com.intellij.codeInsight.lookup.impl.LookupImpl
 import com.intellij.openapi.util.Key
+import com.intellij.util.containers.IntIntHashMap
 
 /**
  * Adds hints to code completion items with the digit that selects it.
@@ -14,6 +15,29 @@ class ProjectLookupListener : LookupManagerListener {
 	companion object {
 		private val OFFSET_KEY = Key.create<Int>("chylexKeyboardMasterOffset")
 		private val IS_MODIFIED_KEY = Key.create<Boolean>("chylexKeyboardMasterModified")
+		
+		private var hintTexts = mutableListOf<String>()
+		private val charToShortcutMap = IntIntHashMap(16, -1)
+		
+		val itemShortcutCount
+			get() = hintTexts.size
+		
+		fun updateShortcuts(configuration: PluginConfiguration) {
+			hintTexts.clear()
+			for (char in configuration.codeCompletionItemShortcuts) {
+				hintTexts.add(" [$char]")
+			}
+			
+			charToShortcutMap.clear()
+			configuration.codeCompletionNextPageShortcut.takeUnless { it == 0 }?.let { charToShortcutMap[it] = 0 }
+			for ((index, char) in configuration.codeCompletionItemShortcuts.withIndex()) {
+				charToShortcutMap[char.code] = index + 1
+			}
+		}
+		
+		fun getShortcut(char: Char): Int {
+			return charToShortcutMap[char.code]
+		}
 		
 		fun getLookupOffset(lookup: LookupImpl): Int {
 			val offset = lookup.getUserData(OFFSET_KEY)
@@ -31,7 +55,7 @@ class ProjectLookupListener : LookupManagerListener {
 	}
 	
 	override fun activeLookupChanged(oldLookup: Lookup?, newLookup: Lookup?) {
-		if (newLookup !is LookupImpl || newLookup.getUserData(IS_MODIFIED_KEY) == true) {
+		if (newLookup !is LookupImpl || newLookup.getUserData(IS_MODIFIED_KEY) == true || itemShortcutCount == 0) {
 			return
 		}
 		
@@ -43,20 +67,17 @@ class ProjectLookupListener : LookupManagerListener {
 			val itemCount = itemList.size
 			val offset = getLookupOffset(newLookup)
 			
-			for (index in 0 until 9) {
+			for (index in hintTexts.indices) {
 				val itemIndex = offset + index
 				if (itemIndex >= itemCount) {
 					break
 				}
 				
 				if (item === itemList.getElementAt(itemIndex)) {
-					val hint = PluginConfiguration.hintText[index]
-					if (hint != "") {
-						val customized = LookupElementPresentation()
-						customized.copyFrom(presentation)
-						customized.appendTailTextItalic(hint, true)
-						return@addPresentationCustomizer customized
-					}
+					val customized = LookupElementPresentation()
+					customized.copyFrom(presentation)
+					customized.appendTailTextItalic(hintTexts[index], true)
+					return@addPresentationCustomizer customized
 				}
 			}
 			

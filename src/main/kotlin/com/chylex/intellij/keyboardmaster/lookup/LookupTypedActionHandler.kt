@@ -1,6 +1,5 @@
 package com.chylex.intellij.keyboardmaster.lookup
 
-import com.chylex.intellij.keyboardmaster.configuration.PluginConfiguration
 import com.intellij.codeInsight.lookup.LookupManager
 import com.intellij.codeInsight.lookup.impl.LookupImpl
 import com.intellij.codeInsight.template.impl.editorActions.TypedActionHandlerBase
@@ -21,8 +20,8 @@ class LookupTypedActionHandler(originalHandler: TypedActionHandler?) : TypedActi
 	}
 	
 	private fun executeImpl(editor: Editor, charTyped: Char): Boolean {
-		val mappedIndex = PluginConfiguration.charToIndexMap[charTyped.code]
-		if (mappedIndex == -1) {
+		val shortcutItem = ProjectLookupListener.getShortcut(charTyped)
+		if (shortcutItem == -1) {
 			return false
 		}
 		
@@ -33,19 +32,21 @@ class LookupTypedActionHandler(originalHandler: TypedActionHandler?) : TypedActi
 		
 		val offset = ProjectLookupListener.getLookupOffset(lookup)
 		
-		if (mappedIndex == 0) {
+		if (shortcutItem == 0) {
 			val list = lookup.list
 			val itemCount = list.model.size
-			val topIndex = (offset + 9).let { if (it >= itemCount) 0 else it }
+			
+			val shortcutCount = ProjectLookupListener.itemShortcutCount
+			val topIndex = (offset + shortcutCount).let { if (it >= itemCount) 0 else it }
 			
 			ProjectLookupListener.setLookupOffset(lookup, topIndex)
 			lookup.selectedIndex = topIndex
-			ScrollingUtil.ensureRangeIsVisible(list, topIndex, topIndex + 8)
+			ScrollingUtil.ensureRangeIsVisible(list, topIndex, topIndex + shortcutCount - 1)
 			lookup.markSelectionTouched()
 			lookup.refreshUi(false, true)
 		}
 		else {
-			lookup.selectedIndex = offset + mappedIndex - 1
+			lookup.selectedIndex = offset + shortcutItem - 1
 		}
 		
 		return true
