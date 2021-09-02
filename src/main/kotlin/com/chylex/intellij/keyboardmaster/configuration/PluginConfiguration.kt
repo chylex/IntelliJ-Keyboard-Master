@@ -19,8 +19,8 @@ class PluginConfiguration : PersistentStateComponent<PluginConfiguration> {
 		private val instance: PluginConfiguration
 			get() = ApplicationManager.getApplication().getService(PluginConfiguration::class.java)
 		
-		init {
-			instance.apply(this::update)
+		fun load() {
+			instance
 		}
 		
 		fun read(callback: (PluginConfiguration) -> Unit) {
@@ -42,5 +42,6 @@ class PluginConfiguration : PersistentStateComponent<PluginConfiguration> {
 	
 	override fun loadState(state: PluginConfiguration) {
 		XmlSerializerUtil.copyBean(state, this)
+		update(this)
 	}
 }

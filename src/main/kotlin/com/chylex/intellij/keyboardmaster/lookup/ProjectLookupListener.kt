@@ -22,6 +22,10 @@ class ProjectLookupListener : LookupManagerListener {
 		val itemShortcutCount
 			get() = hintTexts.size
 		
+		init {
+			PluginConfiguration.load()
+		}
+		
 		fun updateShortcuts(configuration: PluginConfiguration) {
 			hintTexts.clear()
 			for (char in configuration.codeCompletionItemShortcuts) {
