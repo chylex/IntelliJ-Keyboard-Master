@@ -1,5 +1,6 @@
 package com.chylex.intellij.keyboardmaster.lookup
 
+import com.intellij.codeInsight.lookup.LookupFocusDegree
 import com.intellij.codeInsight.lookup.LookupManager
 import com.intellij.codeInsight.lookup.impl.LookupImpl
 import com.intellij.codeInsight.template.impl.editorActions.TypedActionHandlerBase
@@ -46,6 +47,11 @@ class LookupTypedActionHandler(originalHandler: TypedActionHandler?) : TypedActi
 			lookup.refreshUi(false, true)
 		}
 		else {
+			if (!lookup.isFocused) {
+				lookup.lookupFocusDegree = LookupFocusDegree.FOCUSED
+				lookup.refreshUi(false, true)
+			}
+			
 			lookup.selectedIndex = offset + shortcutItem - 1
 		}
 		
