@@ -13,13 +13,13 @@
   <depends>com.intellij.modules.platform</depends>
   
   <projectListeners>
-    <listener class="com.chylex.intellij.keyboardmaster.lookup.ProjectLookupListener" topic="com.intellij.codeInsight.lookup.LookupManagerListener" />
+    <listener class="com.chylex.intellij.keyboardmaster.feature.codeCompletion.CodeCompletionPopupListener" topic="com.intellij.codeInsight.lookup.LookupManagerListener" />
   </projectListeners>
   
   <extensions defaultExtensionNs="com.intellij">
     <applicationService serviceImplementation="com.chylex.intellij.keyboardmaster.configuration.PluginConfiguration" />
     <applicationConfigurable parentId="tools" instance="com.chylex.intellij.keyboardmaster.configuration.PluginConfigurable" id="com.chylex.keyboardmaster" />
     <!--suppress PluginXmlValidity, PluginXmlDynamicPlugin -->
-    <editorTypedHandler implementationClass="com.chylex.intellij.keyboardmaster.lookup.LookupTypedActionHandler" />
+    <editorTypedHandler implementationClass="com.chylex.intellij.keyboardmaster.feature.codeCompletion.CodeCompletionPopupKeyHandler" />
   </extensions>
 </idea-plugin>

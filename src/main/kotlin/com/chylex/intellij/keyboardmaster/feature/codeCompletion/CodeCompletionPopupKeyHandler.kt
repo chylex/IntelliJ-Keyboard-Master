@@ -1,4 +1,4 @@
-package com.chylex.intellij.keyboardmaster.lookup
+package com.chylex.intellij.keyboardmaster.feature.codeCompletion
 
 import com.intellij.codeInsight.lookup.LookupFocusDegree
 import com.intellij.codeInsight.lookup.LookupManager
@@ -10,10 +10,9 @@ import com.intellij.openapi.editor.actionSystem.TypedActionHandler
 import com.intellij.ui.ScrollingUtil
 
 /**
- * When typing digits 1-9 inside a code completion popup menu, selects the n-th item in the list.
- * When typing the digit 0, moves down the list by 9 items, wrapping around if needed.
+ * Handles configured key bindings inside a code completion popup menu.
  */
-class LookupTypedActionHandler(originalHandler: TypedActionHandler?) : TypedActionHandlerBase(originalHandler) {
+class CodeCompletionPopupKeyHandler(originalHandler: TypedActionHandler?) : TypedActionHandlerBase(originalHandler) {
 	override fun execute(editor: Editor, charTyped: Char, dataContext: DataContext) {
 		if (!executeImpl(editor, charTyped)) {
 			myOriginalHandler?.execute(editor, charTyped, dataContext)
@@ -21,8 +20,8 @@ class LookupTypedActionHandler(originalHandler: TypedActionHandler?) : TypedActi
 	}
 	
 	private fun executeImpl(editor: Editor, charTyped: Char): Boolean {
-		val shortcutItem = ProjectLookupListener.getShortcut(charTyped)
-		if (shortcutItem == -1) {
+		val shortcutItem = CodeCompletionPopupConfiguration.getShortcut(charTyped)
+		if (shortcutItem == CodeCompletionPopupConfiguration.SHORTCUT_NONE) {
 			return false
 		}
 		
@@ -31,16 +30,16 @@ class LookupTypedActionHandler(originalHandler: TypedActionHandler?) : TypedActi
 			return false
 		}
 		
-		val offset = ProjectLookupListener.getLookupOffset(lookup)
+		val offset = CodeCompletionPopupListener.getLookupOffset(lookup)
 		
-		if (shortcutItem == 0) {
+		if (shortcutItem == CodeCompletionPopupConfiguration.SHORTCUT_NEXT_PAGE) {
 			val list = lookup.list
 			val itemCount = list.model.size
 			
-			val shortcutCount = ProjectLookupListener.itemShortcutCount
+			val shortcutCount = CodeCompletionPopupConfiguration.itemShortcutCount
 			val topIndex = (offset + shortcutCount).let { if (it >= itemCount) 0 else it }
 			
-			ProjectLookupListener.setLookupOffset(lookup, topIndex)
+			CodeCompletionPopupListener.setLookupOffset(lookup, topIndex)
 			lookup.selectedIndex = topIndex
 			ScrollingUtil.ensureRangeIsVisible(list, topIndex, topIndex + shortcutCount - 1)
 			lookup.markSelectionTouched()

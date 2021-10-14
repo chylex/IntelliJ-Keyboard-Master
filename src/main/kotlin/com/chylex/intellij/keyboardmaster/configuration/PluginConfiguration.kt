@@ -1,6 +1,6 @@
 package com.chylex.intellij.keyboardmaster.configuration
 
-import com.chylex.intellij.keyboardmaster.lookup.ProjectLookupListener
+import com.chylex.intellij.keyboardmaster.feature.codeCompletion.CodeCompletionPopupConfiguration
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.State
@@ -31,8 +31,8 @@ class PluginConfiguration : PersistentStateComponent<PluginConfiguration> {
 			instance.apply(callback).apply(this::update)
 		}
 		
-		private fun update(instance: PluginConfiguration) {
-			ProjectLookupListener.updateShortcuts(instance)
+		private fun update(instance: PluginConfiguration) = with(instance) {
+			CodeCompletionPopupConfiguration.updateShortcuts(codeCompletionItemShortcuts, codeCompletionNextPageShortcut)
 		}
 	}
 	

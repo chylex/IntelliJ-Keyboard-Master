@@ -1,47 +1,18 @@
-package com.chylex.intellij.keyboardmaster.lookup
+package com.chylex.intellij.keyboardmaster.feature.codeCompletion
 
-import com.chylex.intellij.keyboardmaster.configuration.PluginConfiguration
 import com.intellij.codeInsight.lookup.Lookup
 import com.intellij.codeInsight.lookup.LookupElementPresentation
 import com.intellij.codeInsight.lookup.LookupManagerListener
 import com.intellij.codeInsight.lookup.impl.LookupImpl
 import com.intellij.openapi.util.Key
-import com.intellij.util.containers.IntIntHashMap
 
 /**
- * Adds hints to code completion items with the digit that selects it.
+ * Adds hints to code completion popup items with the character that selects the item.
  */
-class ProjectLookupListener : LookupManagerListener {
+class CodeCompletionPopupListener : LookupManagerListener {
 	companion object {
 		private val OFFSET_KEY = Key.create<Int>("chylexKeyboardMasterOffset")
 		private val IS_MODIFIED_KEY = Key.create<Boolean>("chylexKeyboardMasterModified")
-		
-		private var hintTexts = mutableListOf<String>()
-		private val charToShortcutMap = IntIntHashMap(16, -1)
-		
-		val itemShortcutCount
-			get() = hintTexts.size
-		
-		init {
-			PluginConfiguration.load()
-		}
-		
-		fun updateShortcuts(configuration: PluginConfiguration) {
-			hintTexts.clear()
-			for (char in configuration.codeCompletionItemShortcuts) {
-				hintTexts.add(" [$char]")
-			}
-			
-			charToShortcutMap.clear()
-			configuration.codeCompletionNextPageShortcut.takeUnless { it == 0 }?.let { charToShortcutMap[it] = 0 }
-			for ((index, char) in configuration.codeCompletionItemShortcuts.withIndex()) {
-				charToShortcutMap[char.code] = index + 1
-			}
-		}
-		
-		fun getShortcut(char: Char): Int {
-			return charToShortcutMap[char.code]
-		}
 		
 		fun getLookupOffset(lookup: LookupImpl): Int {
 			val offset = lookup.getUserData(OFFSET_KEY)
@@ -59,7 +30,7 @@ class ProjectLookupListener : LookupManagerListener {
 	}
 	
 	override fun activeLookupChanged(oldLookup: Lookup?, newLookup: Lookup?) {
-		if (newLookup !is LookupImpl || newLookup.getUserData(IS_MODIFIED_KEY) == true || itemShortcutCount == 0) {
+		if (newLookup !is LookupImpl || newLookup.getUserData(IS_MODIFIED_KEY) == true || CodeCompletionPopupConfiguration.itemShortcutCount == 0) {
 			return
 		}
 		
@@ -71,7 +42,7 @@ class ProjectLookupListener : LookupManagerListener {
 			val itemCount = itemList.size
 			val offset = getLookupOffset(newLookup)
 			
-			for (index in hintTexts.indices) {
+			for (index in 0 until CodeCompletionPopupConfiguration.itemShortcutCount) {
 				val itemIndex = offset + index
 				if (itemIndex >= itemCount) {
 					break
@@ -80,7 +51,7 @@ class ProjectLookupListener : LookupManagerListener {
 				if (item === itemList.getElementAt(itemIndex)) {
 					val customized = LookupElementPresentation()
 					customized.copyFrom(presentation)
-					customized.appendTailTextItalic(hintTexts[index], true)
+					customized.appendTailTextItalic(CodeCompletionPopupConfiguration.getHintText(index), true)
 					return@addPresentationCustomizer customized
 				}
 			}
