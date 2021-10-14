@@ -1,6 +1,6 @@
 plugins {
 	kotlin("jvm") version "1.5.10"
-	id("org.jetbrains.intellij") version "1.1.4"
+	id("org.jetbrains.intellij") version "1.2.0"
 	java
 }
 
@@ -18,5 +18,5 @@ dependencies {
 }
 
 intellij {
-    version.set("2021.2")
+    version.set("2021.2.2")
 }
