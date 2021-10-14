@@ -36,7 +36,7 @@ class CodeCompletionPopupKeyHandler(originalHandler: TypedActionHandler?) : Type
 		if (shortcutItem == CodeCompletionPopupConfiguration.SHORTCUT_NEXT_PAGE) {
 			setPageOffset(lookup) {
 				val newTopIndex = offset + CodeCompletionPopupConfiguration.itemShortcutCount
-				if (newTopIndex >= it.size) 0 else newTopIndex
+				if (newTopIndex >= it.size) offset else newTopIndex
 			}
 		}
 		else if (shortcutItem == CodeCompletionPopupConfiguration.SHORTCUT_PREV_PAGE) {
