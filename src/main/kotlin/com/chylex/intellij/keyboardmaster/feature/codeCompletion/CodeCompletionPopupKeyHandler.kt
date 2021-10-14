@@ -6,6 +6,7 @@ import com.intellij.codeInsight.lookup.impl.LookupImpl
 import com.intellij.codeInsight.template.impl.editorActions.TypedActionHandlerBase
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.actionSystem.TypedAction
 import com.intellij.openapi.editor.actionSystem.TypedActionHandler
 import com.intellij.ui.ScrollingUtil
 import javax.swing.ListModel
@@ -13,7 +14,16 @@ import javax.swing.ListModel
 /**
  * Handles configured key bindings inside a code completion popup menu.
  */
-class CodeCompletionPopupKeyHandler(originalHandler: TypedActionHandler?) : TypedActionHandlerBase(originalHandler) {
+class CodeCompletionPopupKeyHandler private constructor(originalHandler: TypedActionHandler?) : TypedActionHandlerBase(originalHandler) {
+	companion object {
+		/**
+		 * Registers the key handler as a raw handler, because IdeaVIM steals keys from Keyboard Master when renaming an element in normal mode.
+		 */
+		fun registerRawHandler() {
+			TypedAction.getInstance().let { it.setupRawHandler(CodeCompletionPopupKeyHandler(it.rawHandler)) }
+		}
+	}
+	
 	override fun execute(editor: Editor, charTyped: Char, dataContext: DataContext) {
 		if (!executeImpl(editor, charTyped)) {
 			myOriginalHandler?.execute(editor, charTyped, dataContext)

@@ -19,4 +19,8 @@ dependencies {
 
 intellij {
     version.set("2021.2.2")
+	
+	if (System.getenv("IDEAVIM") == "1") {
+		plugins.add("IdeaVIM:0.66")
+	}
 }

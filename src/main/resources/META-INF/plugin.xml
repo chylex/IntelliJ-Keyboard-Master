@@ -19,7 +19,6 @@
   <extensions defaultExtensionNs="com.intellij">
     <applicationService serviceImplementation="com.chylex.intellij.keyboardmaster.configuration.PluginConfiguration" />
     <applicationConfigurable parentId="tools" instance="com.chylex.intellij.keyboardmaster.configuration.PluginConfigurable" id="com.chylex.keyboardmaster" />
-    <!--suppress PluginXmlValidity, PluginXmlDynamicPlugin -->
-    <editorTypedHandler implementationClass="com.chylex.intellij.keyboardmaster.feature.codeCompletion.CodeCompletionPopupKeyHandler" />
+    <postStartupActivity implementation="com.chylex.intellij.keyboardmaster.PluginStartup" order="last" />
   </extensions>
 </idea-plugin>
