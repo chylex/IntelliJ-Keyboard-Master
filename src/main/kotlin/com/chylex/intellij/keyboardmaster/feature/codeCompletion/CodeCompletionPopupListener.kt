@@ -14,7 +14,7 @@ class CodeCompletionPopupListener : LookupManagerListener {
 		private val OFFSET_KEY = Key.create<Int>("chylexKeyboardMasterOffset")
 		private val IS_MODIFIED_KEY = Key.create<Boolean>("chylexKeyboardMasterModified")
 		
-		fun getLookupOffset(lookup: LookupImpl): Int {
+		fun getPageOffset(lookup: LookupImpl): Int {
 			val offset = lookup.getUserData(OFFSET_KEY)
 			if (offset == null || offset >= lookup.list.model.size) {
 				return 0
@@ -24,7 +24,7 @@ class CodeCompletionPopupListener : LookupManagerListener {
 			}
 		}
 		
-		fun setLookupOffset(lookup: LookupImpl, newOffset: Int) {
+		fun setPageOffset(lookup: LookupImpl, newOffset: Int) {
 			lookup.putUserData(OFFSET_KEY, newOffset)
 		}
 	}
@@ -40,7 +40,7 @@ class CodeCompletionPopupListener : LookupManagerListener {
 		newLookup.addPresentationCustomizer { item, presentation ->
 			val itemList = newLookup.list.model
 			val itemCount = itemList.size
-			val offset = getLookupOffset(newLookup)
+			val offset = getPageOffset(newLookup)
 			
 			for (index in 0 until CodeCompletionPopupConfiguration.itemShortcutCount) {
 				val itemIndex = offset + index

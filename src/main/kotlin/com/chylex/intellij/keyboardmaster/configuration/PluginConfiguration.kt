@@ -14,6 +14,7 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 class PluginConfiguration : PersistentStateComponent<PluginConfiguration> {
 	var codeCompletionItemShortcuts = "123456789"
 	var codeCompletionNextPageShortcut: Int = '0'.code
+	var codeCompletionPrevPageShortcut: Int = 0
 	
 	companion object {
 		private val instance: PluginConfiguration
@@ -32,7 +33,7 @@ class PluginConfiguration : PersistentStateComponent<PluginConfiguration> {
 		}
 		
 		private fun update(instance: PluginConfiguration) = with(instance) {
-			CodeCompletionPopupConfiguration.updateShortcuts(codeCompletionItemShortcuts, codeCompletionNextPageShortcut)
+			CodeCompletionPopupConfiguration.updateShortcuts(codeCompletionItemShortcuts, codeCompletionNextPageShortcut, codeCompletionPrevPageShortcut)
 		}
 	}
 	

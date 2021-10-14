@@ -10,6 +10,7 @@ class PluginConfigurable : Configurable {
 	
 	private val codeCompletionItemShortcuts = JBTextField(20)
 	private val codeCompletionNextPageShortcut = JBTextField(2)
+	private val codeCompletionPrevPageShortcut = JBTextField(2)
 	
 	override fun getDisplayName(): String {
 		return "Keyboard Master"
@@ -20,6 +21,7 @@ class PluginConfigurable : Configurable {
 			titledRow("Code Completion") {
 				row("Item shortcuts:") { component(codeCompletionItemShortcuts) }
 				row("Next page shortcut:") { component(codeCompletionNextPageShortcut) }
+				row("Prev page shortcut:") { component(codeCompletionPrevPageShortcut) }
 			}
 		}
 		
@@ -34,6 +36,7 @@ class PluginConfigurable : Configurable {
 		PluginConfiguration.modify {
 			it.codeCompletionItemShortcuts = codeCompletionItemShortcuts.text
 			it.codeCompletionNextPageShortcut = codeCompletionNextPageShortcut.text.firstOrNull()?.code ?: 0
+			it.codeCompletionPrevPageShortcut = codeCompletionPrevPageShortcut.text.firstOrNull()?.code ?: 0
 		}
 	}
 	
@@ -41,6 +44,7 @@ class PluginConfigurable : Configurable {
 		PluginConfiguration.read {
 			codeCompletionItemShortcuts.text = it.codeCompletionItemShortcuts
 			codeCompletionNextPageShortcut.text = it.codeCompletionNextPageShortcut.let { code -> if (code == 0) "" else code.toChar().toString() }
+			codeCompletionPrevPageShortcut.text = it.codeCompletionPrevPageShortcut.let { code -> if (code == 0) "" else code.toChar().toString() }
 		}
 	}
 }

@@ -8,6 +8,7 @@ import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.TypedActionHandler
 import com.intellij.ui.ScrollingUtil
+import javax.swing.ListModel
 
 /**
  * Handles configured key bindings inside a code completion popup menu.
@@ -30,30 +31,44 @@ class CodeCompletionPopupKeyHandler(originalHandler: TypedActionHandler?) : Type
 			return false
 		}
 		
-		val offset = CodeCompletionPopupListener.getLookupOffset(lookup)
+		val offset = CodeCompletionPopupListener.getPageOffset(lookup)
 		
 		if (shortcutItem == CodeCompletionPopupConfiguration.SHORTCUT_NEXT_PAGE) {
-			val list = lookup.list
-			val itemCount = list.model.size
-			
-			val shortcutCount = CodeCompletionPopupConfiguration.itemShortcutCount
-			val topIndex = (offset + shortcutCount).let { if (it >= itemCount) 0 else it }
-			
-			CodeCompletionPopupListener.setLookupOffset(lookup, topIndex)
-			lookup.selectedIndex = topIndex
-			ScrollingUtil.ensureRangeIsVisible(list, topIndex, topIndex + shortcutCount - 1)
-			lookup.markSelectionTouched()
-			lookup.refreshUi(false, true)
+			setPageOffset(lookup) {
+				val newTopIndex = offset + CodeCompletionPopupConfiguration.itemShortcutCount
+				if (newTopIndex >= it.size) 0 else newTopIndex
+			}
+		}
+		else if (shortcutItem == CodeCompletionPopupConfiguration.SHORTCUT_PREV_PAGE) {
+			setPageOffset(lookup) {
+				val newTopIndex = offset - CodeCompletionPopupConfiguration.itemShortcutCount
+				if (newTopIndex < 0) 0 else newTopIndex
+			}
 		}
 		else {
-			if (!lookup.isFocused) {
-				lookup.lookupFocusDegree = LookupFocusDegree.FOCUSED
-				lookup.refreshUi(false, true)
-			}
-			
-			lookup.selectedIndex = offset + shortcutItem - 1
+			selectItem(lookup, offset + shortcutItem)
 		}
 		
 		return true
+	}
+	
+	private inline fun setPageOffset(lookup: LookupImpl, getNewTopIndex: (ListModel<*>) -> Int) {
+		val list = lookup.list
+		val newTopIndex = getNewTopIndex(list.model)
+		
+		CodeCompletionPopupListener.setPageOffset(lookup, newTopIndex)
+		lookup.selectedIndex = newTopIndex
+		ScrollingUtil.ensureRangeIsVisible(list, newTopIndex, newTopIndex + CodeCompletionPopupConfiguration.itemShortcutCount - 1)
+		lookup.markSelectionTouched()
+		lookup.refreshUi(false, true)
+	}
+	
+	private fun selectItem(lookup: LookupImpl, index: Int) {
+		if (!lookup.isFocused) {
+			lookup.lookupFocusDegree = LookupFocusDegree.FOCUSED
+			lookup.refreshUi(false, true)
+		}
+		
+		lookup.selectedIndex = index
 	}
 }
