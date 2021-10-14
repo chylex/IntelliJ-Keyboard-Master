@@ -2,6 +2,7 @@
 /.idea/inspectionProfiles
 /.idea/jarRepositories.xml
 /.idea/misc.xml
+/.idea/*.iml
 
 /.gradle/
 /build/
