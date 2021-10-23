@@ -2,6 +2,7 @@
   <id>com.chylex.intellij.keyboardmaster.KeyboardMaster</id>
   <name>Keyboard Master</name>
   <vendor url="https://chylex.com">chylex</vendor>
+  <idea-version since-build="212.5284" />
   
   <description><![CDATA[
     Collection of keyboard-centric additions.
