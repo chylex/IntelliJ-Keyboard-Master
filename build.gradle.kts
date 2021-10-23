@@ -1,7 +1,9 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
+	java
 	kotlin("jvm") version "1.5.10"
 	id("org.jetbrains.intellij") version "1.2.0"
-	java
 }
 
 group = "com.chylex.intellij.keyboardmaster"
@@ -12,7 +14,6 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
@@ -24,4 +25,8 @@ intellij {
 	if (System.getenv("IDEAVIM") == "1") {
 		plugins.add("IdeaVIM:0.66")
 	}
+}
+
+tasks.withType<KotlinCompile> {
+	kotlinOptions.jvmTarget = "11"
 }
