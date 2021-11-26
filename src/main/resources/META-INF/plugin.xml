@@ -8,6 +8,7 @@
     Collection of keyboard-centric additions.
     <ul>
       <li>Code completion items can be jumped to using customizable characters (numbers by default).</li>
+      <li>Keyboard shortcuts to select next/previous item in focused menu.</li>
     </ul>
   ]]></description>
   
@@ -22,4 +23,9 @@
     <applicationConfigurable parentId="tools" instance="com.chylex.intellij.keyboardmaster.configuration.PluginConfigurable" id="com.chylex.keyboardmaster" />
     <postStartupActivity implementation="com.chylex.intellij.keyboardmaster.PluginStartup" order="last" />
   </extensions>
+  
+  <actions>
+    <action id="com.chylex.intellij.keyboardmaster.feature.actions.NextMenuItemAction" class="com.chylex.intellij.keyboardmaster.feature.actions.NextMenuItemAction" text="Next Menu Item" />
+    <action id="com.chylex.intellij.keyboardmaster.feature.actions.PrevMenuItemAction" class="com.chylex.intellij.keyboardmaster.feature.actions.PrevMenuItemAction" text="Previous Menu Item" />
+  </actions>
 </idea-plugin>
