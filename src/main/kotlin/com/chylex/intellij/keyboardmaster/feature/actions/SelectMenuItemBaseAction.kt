@@ -9,6 +9,7 @@ import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.ui.ComponentUtil
 import java.awt.KeyboardFocusManager
 import javax.swing.JList
+import javax.swing.JTree
 
 abstract class SelectMenuItemBaseAction internal constructor(): DumbAwareAction() {
 	init {
@@ -31,10 +32,20 @@ abstract class SelectMenuItemBaseAction internal constructor(): DumbAwareAction(
 				updateSelection(focused)
 				break
 			}
+			else if (focused is JTree) {
+				updateSelection(focused)
+				break
+			}
 			else if (focused is BigPopupUI) {
 				val list = ComponentUtil.findComponentsOfType(focused, JList::class.java).singleOrNull()
 				if (list != null) {
 					updateSelection(list)
+					break
+				}
+				
+				val tree = ComponentUtil.findComponentsOfType(focused, JTree::class.java).singleOrNull()
+				if (tree != null) {
+					updateSelection(tree)
 					break
 				}
 			}
@@ -49,6 +60,15 @@ abstract class SelectMenuItemBaseAction internal constructor(): DumbAwareAction(
 		if (newIndex in 0 until list.model.size) {
 			list.selectedIndex = newIndex
 			list.ensureIndexIsVisible(newIndex)
+		}
+	}
+	
+	protected abstract fun updateSelection(tree: JTree)
+	
+	protected fun setSelectedIndex(list: JTree, newIndex: Int) {
+		if (newIndex in 0 until list.rowCount) {
+			list.setSelectionRow(newIndex)
+			list.scrollRowToVisible(newIndex)
 		}
 	}
 }
