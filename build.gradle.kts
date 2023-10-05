@@ -1,24 +1,22 @@
+@file:Suppress("ConvertLambdaToReference")
+
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-	kotlin("jvm") version "1.5.10"
-	id("org.jetbrains.intellij") version "1.2.0"
+	kotlin("jvm") version "1.8.0"
+	id("org.jetbrains.intellij") version "1.15.0"
 }
 
 group = "com.chylex.intellij.keyboardmaster"
 version = "0.2.1"
 
 repositories {
-    mavenCentral()
-}
-
-dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+	mavenCentral()
 }
 
 intellij {
-    version.set("2021.2.2")
+	type.set("IU")
+	version.set("2023.2")
 	updateSinceUntilBuild.set(false)
 	
 	if (System.getenv("IDEAVIM") == "1") {
@@ -26,6 +24,24 @@ intellij {
 	}
 }
 
+kotlin {
+	jvmToolchain(17)
+}
+
+dependencies {
+	testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
+}
+
+tasks.patchPluginXml {
+	sinceBuild.set("232")
+}
+
+tasks.test {
+	useJUnitPlatform()
+}
+
 tasks.withType<KotlinCompile> {
-	kotlinOptions.jvmTarget = "11"
+	kotlinOptions.freeCompilerArgs = listOf(
+		"-Xjvm-default=all"
+	)
 }
