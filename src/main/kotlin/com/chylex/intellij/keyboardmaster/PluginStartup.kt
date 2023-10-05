@@ -3,12 +3,12 @@ package com.chylex.intellij.keyboardmaster
 import com.chylex.intellij.keyboardmaster.feature.codeCompletion.CodeCompletionPopupKeyHandler
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.startup.StartupActivity
+import com.intellij.openapi.startup.ProjectActivity
 
-class PluginStartup : StartupActivity.DumbAware {
+class PluginStartup : ProjectActivity {
 	private var isInitialized = false
 	
-	override fun runActivity(project: Project) {
+	override suspend fun execute(project: Project) {
 		if (!isInitialized) {
 			isInitialized = true
 			
