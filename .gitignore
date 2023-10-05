@@ -1,8 +1,5 @@
-/.idea/dictionaries
-/.idea/inspectionProfiles
-/.idea/jarRepositories.xml
-/.idea/misc.xml
-/.idea/*.iml
+/.idea/*
+!/.idea/runConfigurations
 
 /.gradle/
 /build/
