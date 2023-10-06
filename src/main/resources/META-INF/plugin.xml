@@ -19,7 +19,7 @@
   
   <extensions defaultExtensionNs="com.intellij">
     <applicationService serviceImplementation="com.chylex.intellij.keyboardmaster.configuration.PluginConfiguration" />
-    <applicationConfigurable parentId="tools" instance="com.chylex.intellij.keyboardmaster.configuration.PluginConfigurable" id="com.chylex.keyboardmaster" />
+    <applicationConfigurable parentId="tools" instance="com.chylex.intellij.keyboardmaster.configuration.PluginConfigurable" id="com.chylex.keyboardmaster" displayName="Keyboard Master" />
     <postStartupActivity implementation="com.chylex.intellij.keyboardmaster.PluginStartup" order="last" />
   </extensions>
 </idea-plugin>
