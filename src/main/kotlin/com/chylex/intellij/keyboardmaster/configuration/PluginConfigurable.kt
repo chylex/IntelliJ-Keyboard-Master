@@ -2,7 +2,7 @@ package com.chylex.intellij.keyboardmaster.configuration
 
 import com.intellij.openapi.options.Configurable
 import com.intellij.ui.components.JBTextField
-import com.intellij.ui.layout.panel
+import com.intellij.ui.dsl.builder.panel
 import javax.swing.JComponent
 
 class PluginConfigurable : Configurable {
@@ -18,10 +18,10 @@ class PluginConfigurable : Configurable {
 	
 	override fun createComponent(): JComponent {
 		component = panel {
-			titledRow("Code Completion") {
-				row("Item shortcuts:") { component(codeCompletionItemShortcuts) }
-				row("Next page shortcut:") { component(codeCompletionNextPageShortcut) }
-				row("Prev page shortcut:") { component(codeCompletionPrevPageShortcut) }
+			group("Code Completion") {
+				row("Item shortcuts:") { cell(codeCompletionItemShortcuts) }
+				row("Next page shortcut:") { cell(codeCompletionNextPageShortcut) }
+				row("Prev page shortcut:") { cell(codeCompletionPrevPageShortcut) }
 			}
 		}
 		
