@@ -22,4 +22,18 @@
     <applicationConfigurable parentId="tools" instance="com.chylex.intellij.keyboardmaster.configuration.PluginConfigurable" id="com.chylex.keyboardmaster" displayName="Keyboard Master" />
     <postStartupActivity implementation="com.chylex.intellij.keyboardmaster.PluginStartup" order="last" />
   </extensions>
+  
+  <actions>
+    <!-- Go to Highlighted Error -->
+    <action id="KM.GotoNextErrorInOtherMode"
+            text="Next Highlighted Error in Other Mode"
+            class="com.chylex.intellij.keyboardmaster.feature.action.gotoError.GotoNextErrorInOtherModeAction">
+      <add-to-group group-id="GoToErrorGroup" anchor="after" relative-to-action="GotoNextError" />
+    </action>
+    <action id="KM.GotoPreviousErrorInOtherMode"
+            text="Previous Highlighted Error in Other Mode"
+            class="com.chylex.intellij.keyboardmaster.feature.action.gotoError.GotoPreviousErrorInOtherModeAction">
+      <add-to-group group-id="GoToErrorGroup" anchor="after" relative-to-action="GotoPreviousError" />
+    </action>
+  </actions>
 </idea-plugin>
