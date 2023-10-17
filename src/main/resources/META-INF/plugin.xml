@@ -12,6 +12,7 @@
   ]]></description>
   
   <depends>com.intellij.modules.platform</depends>
+  <depends optional="true" config-file="KeyboardMaster-Java.xml">com.intellij.java</depends>
   
   <projectListeners>
     <listener class="com.chylex.intellij.keyboardmaster.feature.codeCompletion.CodeCompletionPopupListener" topic="com.intellij.codeInsight.lookup.LookupManagerListener" />

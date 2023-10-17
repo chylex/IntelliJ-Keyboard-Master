@@ -19,6 +19,8 @@ intellij {
 	version.set("2023.2")
 	updateSinceUntilBuild.set(false)
 	
+	plugins.add("com.intellij.java")
+	
 	if (System.getenv("IDEAVIM") == "1") {
 		plugins.add("IdeaVIM:0.66")
 	}

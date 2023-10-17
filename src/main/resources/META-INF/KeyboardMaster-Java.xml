@@ -1,0 +1,15 @@
+<idea-plugin>
+  <actions>
+    <!-- Go to Type in File -->
+    <action id="KM.GotoNextTypeInFile"
+            text="Next Type"
+            class="com.chylex.intellij.keyboardmaster.feature.action.gotoType.GotoNextTypeInFileAction">
+      <add-to-group group-id="NavigateInFileGroup" anchor="after" relative-to-action="MethodUp" />
+    </action>
+    <action id="KM.GotoPreviousTypeInFile"
+            text="Previous Type"
+            class="com.chylex.intellij.keyboardmaster.feature.action.gotoType.GotoPreviousTypeInFileAction">
+      <add-to-group group-id="NavigateInFileGroup" anchor="after" relative-to-action="KM.GotoNextTypeInFile" />
+    </action>
+  </actions>
+</idea-plugin>
