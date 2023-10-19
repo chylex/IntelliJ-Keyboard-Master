@@ -7,7 +7,8 @@
     Collection of keyboard-centric additions.
     <ul>
       <li>Code completion items can be jumped to using customizable characters (numbers by default).</li>
-      <li>Keyboard shortcuts to select next/previous item in focused menu.</li>
+      <li>Action to go to next/previous highlighted error in other mode.</li>
+      <li>Action to go to next/previous type in file.</li>
     </ul>
   ]]></description>
   
