@@ -16,7 +16,7 @@ repositories {
 
 intellij {
 	type.set("IU")
-	version.set("2023.2")
+	version.set("233.11799-EAP-CANDIDATE-SNAPSHOT")
 	updateSinceUntilBuild.set(false)
 	
 	plugins.add("com.intellij.java")
@@ -35,7 +35,7 @@ dependencies {
 }
 
 tasks.patchPluginXml {
-	sinceBuild.set("232")
+	sinceBuild.set("233.11799.30")
 }
 
 tasks.test {

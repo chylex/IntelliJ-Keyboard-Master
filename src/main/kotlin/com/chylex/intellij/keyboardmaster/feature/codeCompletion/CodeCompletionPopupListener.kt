@@ -1,10 +1,13 @@
 package com.chylex.intellij.keyboardmaster.feature.codeCompletion
 
 import com.intellij.codeInsight.lookup.Lookup
+import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementPresentation
 import com.intellij.codeInsight.lookup.LookupManagerListener
+import com.intellij.codeInsight.lookup.impl.LookupCellRenderer.ItemPresentationCustomizer
 import com.intellij.codeInsight.lookup.impl.LookupImpl
 import com.intellij.openapi.util.Key
+import javax.swing.Icon
 
 /**
  * Adds hints to code completion popup items with the character that selects the item.
@@ -37,26 +40,32 @@ class CodeCompletionPopupListener : LookupManagerListener {
 		newLookup.putUserData(IS_MODIFIED_KEY, true)
 		
 		@Suppress("UnstableApiUsage")
-		newLookup.addPresentationCustomizer { item, presentation ->
-			val itemList = newLookup.list.model
-			val itemCount = itemList.size
-			val offset = getPageOffset(newLookup)
-			
-			for (index in 0 until CodeCompletionPopupConfiguration.itemShortcutCount) {
-				val itemIndex = offset + index
-				if (itemIndex >= itemCount) {
-					break
+		newLookup.addPresentationCustomizer(object : ItemPresentationCustomizer {
+			override fun customizePresentation(item: LookupElement, presentation: LookupElementPresentation): LookupElementPresentation {
+				val itemList = newLookup.list.model
+				val itemCount = itemList.size
+				val offset = getPageOffset(newLookup)
+				
+				for (index in 0 until CodeCompletionPopupConfiguration.itemShortcutCount) {
+					val itemIndex = offset + index
+					if (itemIndex >= itemCount) {
+						break
+					}
+					
+					if (item === itemList.getElementAt(itemIndex)) {
+						val customized = LookupElementPresentation()
+						customized.copyFrom(presentation)
+						customized.appendTailTextItalic(CodeCompletionPopupConfiguration.getHintText(index), true)
+						return customized
+					}
 				}
 				
-				if (item === itemList.getElementAt(itemIndex)) {
-					val customized = LookupElementPresentation()
-					customized.copyFrom(presentation)
-					customized.appendTailTextItalic(CodeCompletionPopupConfiguration.getHintText(index), true)
-					return@addPresentationCustomizer customized
-				}
+				return presentation
 			}
 			
-			presentation
-		}
+			override fun customizeEmptyIcon(icon: Icon): Icon {
+				return icon
+			}
+		})
 	}
 }
