@@ -3,8 +3,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-	kotlin("jvm") version "1.8.0"
-	id("org.jetbrains.intellij") version "1.15.0"
+	kotlin("jvm") version "1.9.22"
+	id("org.jetbrains.intellij") version "1.17.3"
 }
 
 group = "com.chylex.intellij.keyboardmaster"
@@ -16,13 +16,13 @@ repositories {
 
 intellij {
 	type.set("IU")
-	version.set("233.11799-EAP-CANDIDATE-SNAPSHOT")
+	version.set("2024.1.1")
 	updateSinceUntilBuild.set(false)
 	
 	plugins.add("com.intellij.java")
 	
 	if (System.getenv("IDEAVIM") == "1") {
-		plugins.add("IdeaVIM:0.66")
+		plugins.add("IdeaVIM:2.10.2")
 	}
 }
 
@@ -31,11 +31,11 @@ kotlin {
 }
 
 dependencies {
-	testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
+	testImplementation("org.junit.jupiter:junit-jupiter:5.11.0-M1")
 }
 
 tasks.patchPluginXml {
-	sinceBuild.set("233.11799.30")
+	sinceBuild.set("241")
 }
 
 tasks.test {
