@@ -1,6 +1,7 @@
 package com.chylex.intellij.keyboardmaster.configuration
 
 import com.chylex.intellij.keyboardmaster.feature.codeCompletion.CodeCompletionPopupConfiguration
+import com.chylex.intellij.keyboardmaster.feature.vimNavigation.VimNavigation
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.State
@@ -15,6 +16,8 @@ class PluginConfiguration : PersistentStateComponent<PluginConfiguration> {
 	var codeCompletionItemShortcuts = "123456789"
 	var codeCompletionNextPageShortcut: Int = '0'.code
 	var codeCompletionPrevPageShortcut: Int = 0
+	
+	var enableVimNavigation = false
 	
 	companion object {
 		private val instance: PluginConfiguration
@@ -34,6 +37,7 @@ class PluginConfiguration : PersistentStateComponent<PluginConfiguration> {
 		
 		private fun update(instance: PluginConfiguration) = with(instance) {
 			CodeCompletionPopupConfiguration.updateShortcuts(codeCompletionItemShortcuts, codeCompletionNextPageShortcut, codeCompletionPrevPageShortcut)
+			VimNavigation.isEnabled = enableVimNavigation
 		}
 	}
 	

@@ -1,6 +1,5 @@
 package com.chylex.intellij.keyboardmaster.feature.codeCompletion
 
-import com.chylex.intellij.keyboardmaster.configuration.PluginConfiguration
 import com.intellij.util.containers.IntIntHashMap
 
 object CodeCompletionPopupConfiguration {
@@ -13,10 +12,6 @@ object CodeCompletionPopupConfiguration {
 	
 	val itemShortcutCount
 		get() = hintTexts.size
-	
-	init {
-		PluginConfiguration.load()
-	}
 	
 	fun updateShortcuts(itemShortcutChars: String, nextPageShortcutCode: Int, previousPageShortcutCode: Int) {
 		charToShortcutMap.clear()
