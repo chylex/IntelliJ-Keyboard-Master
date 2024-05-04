@@ -23,7 +23,7 @@ internal object VimCommonNavigation {
 			KeyStroke.getKeyStroke('m') to IdeaAction("ShowPopupMenu"),
 			KeyStroke.getKeyStroke('r') to IdeaAction("SynchronizeCurrentFile"),
 			KeyStroke.getKeyStroke('R') to IdeaAction("Synchronize"),
-			KeyStroke.getKeyStroke('q') to CloseParentToolWindow(),
+			KeyStroke.getKeyStroke('q') to CloseParentPopupOrToolWindow(),
 			KeyStroke.getKeyStroke('/') to StartSearch(),
 		)
 	)
@@ -40,8 +40,14 @@ internal object VimCommonNavigation {
 		}
 	}
 	
-	private class CloseParentToolWindow<T : JComponent> : ActionNode<VimNavigationDispatcher<T>> {
+	private class CloseParentPopupOrToolWindow<T : JComponent> : ActionNode<VimNavigationDispatcher<T>> {
 		override fun performAction(holder: VimNavigationDispatcher<T>, actionEvent: AnActionEvent, keyEvent: KeyEvent) {
+			val popup = holder.popup
+			if (popup != null) {
+				popup.cancel()
+				return
+			}
+			
 			val project = actionEvent.project ?: return
 			val toolWindowId = holder.component.getParentToolWindowId() ?: return
 			ToolWindowManagerEx.getInstanceEx(project).hideToolWindow(toolWindowId, true)

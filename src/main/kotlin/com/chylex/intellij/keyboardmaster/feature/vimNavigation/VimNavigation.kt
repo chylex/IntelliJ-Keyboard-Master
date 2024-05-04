@@ -5,6 +5,7 @@ import com.chylex.intellij.keyboardmaster.feature.vimNavigation.components.VimLi
 import com.chylex.intellij.keyboardmaster.feature.vimNavigation.components.VimTableNavigation
 import com.chylex.intellij.keyboardmaster.feature.vimNavigation.components.VimTreeNavigation
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.ui.UiInterceptors
 import com.intellij.util.ui.StartupUiUtil
 import java.awt.AWTEvent
 import java.awt.event.FocusEvent
@@ -17,7 +18,10 @@ object VimNavigation {
 	var isEnabled = false
 	
 	fun register() {
-		StartupUiUtil.addAwtListener(::handleEvent, AWTEvent.FOCUS_EVENT_MASK, ApplicationManager.getApplication().getService(PluginDisposableService::class.java))
+		val disposable = ApplicationManager.getApplication().getService(PluginDisposableService::class.java)
+		
+		StartupUiUtil.addAwtListener(::handleEvent, AWTEvent.FOCUS_EVENT_MASK, disposable)
+		UiInterceptors.registerPersistent(disposable, PopupInterceptor)
 	}
 	
 	private fun handleEvent(event: AWTEvent) {

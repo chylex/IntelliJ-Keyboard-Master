@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.JComponent
 import javax.swing.KeyStroke
 
-internal class VimNavigationDispatcher<T : JComponent>(override val component: T, private val rootNode: KeyStrokeNode.Parent<VimNavigationDispatcher<T>>) : DumbAwareAction(), ComponentHolder {
+internal open class VimNavigationDispatcher<T : JComponent>(final override val component: T, private val rootNode: KeyStrokeNode.Parent<VimNavigationDispatcher<T>>) : DumbAwareAction(), ComponentHolder {
 	companion object {
 		private val DISPOSABLE = ApplicationManager.getApplication().getService(PluginDisposableService::class.java)
 		private val EXTRA_SHORTCUTS = setOf(
@@ -35,16 +35,21 @@ internal class VimNavigationDispatcher<T : JComponent>(override val component: T
 	var isSearching = AtomicBoolean(false)
 	
 	init {
-		registerCustomShortcutSet(KeyStrokeNode.getAllShortcuts(rootNode, EXTRA_SHORTCUTS), component, DISPOSABLE)
+		registerCustomShortcutSet(KeyStrokeNode.getAllShortcuts(getAllKeyStrokes()), component, DISPOSABLE)
 		
-		SpeedSearchSupply.getSupply(component, true)?.addChangeListener {
-			if (it.propertyName == SpeedSearchSupply.ENTERED_PREFIX_PROPERTY_NAME && it.oldValue != null && it.newValue == null) {
+		val speedSearch = SpeedSearchSupply.getSupply(component, true)
+		speedSearch?.addChangeListener {
+			if (it.propertyName == SpeedSearchSupply.ENTERED_PREFIX_PROPERTY_NAME && !speedSearch.isPopupActive) {
 				isSearching.set(false)
 			}
 		}
 	}
 	
-	override fun actionPerformed(e: AnActionEvent) {
+	protected fun getAllKeyStrokes(): Set<KeyStroke> {
+		return KeyStrokeNode.getAllKeyStrokes(rootNode, EXTRA_SHORTCUTS)
+	}
+	
+	final override fun actionPerformed(e: AnActionEvent) {
 		val keyEvent = e.inputEvent as? KeyEvent ?: return
 		
 		if (keyEvent.id == KeyEvent.KEY_PRESSED && handleSpecialKeyPress(keyEvent, e.dataContext)) {
@@ -89,11 +94,11 @@ internal class VimNavigationDispatcher<T : JComponent>(override val component: T
 		}
 	}
 	
-	override fun update(e: AnActionEvent) {
+	final override fun update(e: AnActionEvent) {
 		e.presentation.isEnabled = !isSearching.get() || e.inputEvent.let { it is KeyEvent && it.id == KeyEvent.KEY_PRESSED && it.keyCode == KeyEvent.VK_ENTER }
 	}
 	
-	override fun getActionUpdateThread(): ActionUpdateThread {
+	final override fun getActionUpdateThread(): ActionUpdateThread {
 		return ActionUpdateThread.BGT
 	}
 }

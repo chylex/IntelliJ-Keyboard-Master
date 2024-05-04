@@ -23,10 +23,10 @@ internal interface KeyStrokeNode<T> {
 		}
 		
 		fun getChild(keyEvent: KeyEvent): KeyStrokeNode<T> {
-			val keyStroke = when (keyEvent.id) {
-				KeyEvent.KEY_TYPED   -> KeyStroke.getKeyStroke(keyEvent.keyChar, keyEvent.modifiersEx and KeyEvent.SHIFT_DOWN_MASK.inv())
-				KeyEvent.KEY_PRESSED -> KeyStroke.getKeyStroke(keyEvent.keyCode, keyEvent.modifiersEx, false)
-				else                 -> return this
+			val keyStroke = when {
+				keyEvent.keyChar != KeyEvent.CHAR_UNDEFINED -> KeyStroke.getKeyStroke(keyEvent.keyChar, keyEvent.modifiersEx and KeyEvent.SHIFT_DOWN_MASK.inv())
+				keyEvent.id == KeyEvent.KEY_PRESSED         -> KeyStroke.getKeyStroke(keyEvent.keyCode, keyEvent.modifiersEx, false)
+				else                                        -> return this
 			}
 			
 			return keys[keyStroke] ?: this
@@ -71,7 +71,7 @@ internal interface KeyStrokeNode<T> {
 	}
 	
 	companion object {
-		fun <T> getAllShortcuts(root: Parent<T>, extra: Set<KeyStroke>? = null): CustomShortcutSet {
+		fun <T> getAllKeyStrokes(root: Parent<T>, extra: Set<KeyStroke>? = null): Set<KeyStroke> {
 			val allKeyStrokes = HashSet(root.allKeyStrokes)
 			
 			if (extra != null) {
@@ -82,7 +82,11 @@ internal interface KeyStrokeNode<T> {
 				allKeyStrokes.add(KeyStroke.getKeyStroke(c))
 			}
 			
-			return CustomShortcutSet(*allKeyStrokes.map2Array { KeyboardShortcut(it, null) })
+			return allKeyStrokes
+		}
+		
+		fun getAllShortcuts(keyStrokes: Set<KeyStroke>): CustomShortcutSet {
+			return CustomShortcutSet(*keyStrokes.map2Array { KeyboardShortcut(it, null) })
 		}
 	}
 }
