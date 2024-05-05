@@ -37,7 +37,7 @@ class PluginConfiguration : PersistentStateComponent<PluginConfiguration> {
 		
 		private fun update(instance: PluginConfiguration) = with(instance) {
 			CodeCompletionPopupConfiguration.updateShortcuts(codeCompletionItemShortcuts, codeCompletionNextPageShortcut, codeCompletionPrevPageShortcut)
-			VimNavigation.isEnabled = enableVimNavigation
+			VimNavigation.setEnabled(enableVimNavigation)
 		}
 	}
 	
