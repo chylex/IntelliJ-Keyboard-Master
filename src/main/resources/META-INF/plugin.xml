@@ -7,6 +7,7 @@
     Collection of keyboard-centric additions.
     <ul>
       <li>Code completion items can be jumped to using customizable characters (numbers by default).</li>
+      <li>Vim-style navigation in lists / trees / tables.</li>
       <li>Action to go to next/previous highlighted error in other mode.</li>
       <li>Action to go to next/previous type in file.</li>
     </ul>
