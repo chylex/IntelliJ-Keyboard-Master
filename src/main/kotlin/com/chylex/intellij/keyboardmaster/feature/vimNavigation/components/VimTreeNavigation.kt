@@ -20,15 +20,17 @@ internal object VimTreeNavigation {
 			KeyStroke.getKeyStroke('g') to Parent(
 				mapOf(
 					KeyStroke.getKeyStroke('g') to IdeaAction("Tree-selectFirst"),
+					KeyStroke.getKeyStroke('j') to SelectLastSibling,
+					KeyStroke.getKeyStroke('k') to SelectFirstSibling,
 				)
 			),
 			KeyStroke.getKeyStroke('G') to IdeaAction("Tree-selectLast"),
 			KeyStroke.getKeyStroke('j') to IdeaAction("Tree-selectNext"),
 			KeyStroke.getKeyStroke('j', KeyEvent.ALT_DOWN_MASK) to IdeaAction("Tree-selectNextSibling"),
-			KeyStroke.getKeyStroke('J') to SelectLastSibling,
+			KeyStroke.getKeyStroke('J') to IdeaAction("Tree-selectNextExtendSelection"),
 			KeyStroke.getKeyStroke('k') to IdeaAction("Tree-selectPrevious"),
 			KeyStroke.getKeyStroke('k', KeyEvent.ALT_DOWN_MASK) to IdeaAction("Tree-selectPreviousSibling"),
-			KeyStroke.getKeyStroke('K') to SelectFirstSibling,
+			KeyStroke.getKeyStroke('K') to IdeaAction("Tree-selectPreviousExtendSelection"),
 			KeyStroke.getKeyStroke('o') to ExpandOrCollapseTreeNode,
 			KeyStroke.getKeyStroke('O') to IdeaAction("FullyExpandTreeNode"),
 			KeyStroke.getKeyStroke('p') to IdeaAction("Tree-selectParentNoCollapse"),

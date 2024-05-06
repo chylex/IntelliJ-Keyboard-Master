@@ -21,9 +21,13 @@ internal object VimTableNavigation {
 			),
 			KeyStroke.getKeyStroke('G') to IdeaAction("Table-selectLastRow"),
 			KeyStroke.getKeyStroke('h') to IdeaAction("Table-selectPreviousColumn"),
+			KeyStroke.getKeyStroke('H') to IdeaAction("Table-selectPreviousColumnExtendSelection"),
 			KeyStroke.getKeyStroke('j') to IdeaAction("Table-selectNextRow"),
+			KeyStroke.getKeyStroke('J') to IdeaAction("Table-selectNextRowExtendSelection"),
 			KeyStroke.getKeyStroke('k') to IdeaAction("Table-selectPreviousRow"),
+			KeyStroke.getKeyStroke('K') to IdeaAction("Table-selectPreviousRowExtendSelection"),
 			KeyStroke.getKeyStroke('l') to IdeaAction("Table-selectNextColumn"),
+			KeyStroke.getKeyStroke('L') to IdeaAction("Table-selectNextColumnExtendSelection"),
 		)
 	)
 	

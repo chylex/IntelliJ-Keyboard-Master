@@ -28,9 +28,13 @@ internal object VimListNavigation {
 			),
 			KeyStroke.getKeyStroke('G') to IdeaAction("List-selectLastRow"),
 			KeyStroke.getKeyStroke('h') to IdeaAction("List-selectPreviousColumn"),
+			KeyStroke.getKeyStroke('H') to IdeaAction("List-selectPreviousColumnExtendSelection"),
 			KeyStroke.getKeyStroke('j') to IdeaAction("List-selectNextRow"),
+			KeyStroke.getKeyStroke('J') to IdeaAction("List-selectNextRowExtendSelection"),
 			KeyStroke.getKeyStroke('k') to IdeaAction("List-selectPreviousRow"),
+			KeyStroke.getKeyStroke('K') to IdeaAction("List-selectPreviousRowExtendSelection"),
 			KeyStroke.getKeyStroke('l') to IdeaAction("List-selectNextColumn"),
+			KeyStroke.getKeyStroke('L') to IdeaAction("List-selectNextColumnExtendSelection"),
 		)
 	)
 	
