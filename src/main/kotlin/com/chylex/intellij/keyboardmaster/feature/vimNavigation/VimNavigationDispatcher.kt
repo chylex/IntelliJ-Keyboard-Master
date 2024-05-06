@@ -3,15 +3,14 @@ package com.chylex.intellij.keyboardmaster.feature.vimNavigation
 import com.chylex.intellij.keyboardmaster.PluginDisposableService
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.DumbAwareAction
-import com.intellij.pom.Navigatable
 import com.intellij.toolWindow.InternalDecoratorImpl
 import com.intellij.ui.SpeedSearchBase
 import com.intellij.ui.speedSearch.SpeedSearch
 import com.intellij.ui.speedSearch.SpeedSearchSupply
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
 import java.awt.event.KeyEvent
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.JComponent
@@ -22,7 +21,7 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 		private val DISPOSABLE = ApplicationManager.getApplication().getService(PluginDisposableService::class.java)
 		private val EXTRA_SHORTCUTS = setOf(
 			KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-			KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+			KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)
 		)
 		
 		@Suppress("UnstableApiUsage")
@@ -31,6 +30,7 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 		}
 	}
 	
+	private val originalEnterAction: ActionListener? = component.getActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0))
 	private var currentNode: KeyStrokeNode.Parent<VimNavigationDispatcher<T>> = rootNode
 	var isSearching = AtomicBoolean(false)
 	
@@ -52,7 +52,7 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 	final override fun actionPerformed(e: AnActionEvent) {
 		val keyEvent = e.inputEvent as? KeyEvent ?: return
 		
-		if (keyEvent.id == KeyEvent.KEY_PRESSED && handleSpecialKeyPress(keyEvent, e.dataContext)) {
+		if (keyEvent.id == KeyEvent.KEY_PRESSED && handleSpecialKeyPress(keyEvent)) {
 			currentNode = rootNode
 			return
 		}
@@ -66,20 +66,20 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 		}
 	}
 	
-	private fun handleSpecialKeyPress(keyEvent: KeyEvent, dataContext: DataContext): Boolean {
+	private fun handleSpecialKeyPress(keyEvent: KeyEvent): Boolean {
 		if (keyEvent.keyCode == KeyEvent.VK_ESCAPE) {
 			return true
 		}
 		
 		if (keyEvent.keyCode == KeyEvent.VK_ENTER) {
-			handleEnterKeyPress(dataContext)
+			handleEnterKeyPress(ActionEvent(component, ActionEvent.ACTION_PERFORMED, "Enter", keyEvent.`when`, keyEvent.modifiersEx))
 			return true
 		}
 		
 		return false
 	}
 	
-	private fun handleEnterKeyPress(dataContext: DataContext) {
+	private fun handleEnterKeyPress(e: ActionEvent) {
 		if (isSearching.compareAndSet(true, false)) {
 			when (val supply = SpeedSearchSupply.getSupply(component)) {
 				is SpeedSearchBase<*> -> supply.hidePopup()
@@ -87,10 +87,7 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 			}
 		}
 		else {
-			val navigatables = dataContext.getData(CommonDataKeys.NAVIGATABLE_ARRAY)?.filter(Navigatable::canNavigate).orEmpty()
-			for ((index, navigatable) in navigatables.withIndex()) {
-				navigatable.navigate(index == navigatables.lastIndex)
-			}
+			originalEnterAction?.actionPerformed(e)
 		}
 	}
 	
