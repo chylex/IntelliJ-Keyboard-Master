@@ -24,12 +24,7 @@ import javax.swing.KeyStroke
 internal open class VimNavigationDispatcher<T : JComponent>(final override val component: T, private val rootNode: KeyStrokeNode.Parent<VimNavigationDispatcher<T>>) : DumbAwareAction(), ComponentHolder {
 	companion object {
 		private val DISPOSABLE = ApplicationManager.getApplication().getService(PluginDisposableService::class.java)
-		
 		private val ENTER_KEY = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)
-		private val EXTRA_SHORTCUTS = setOf(
-			KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-			ENTER_KEY
-		)
 		
 		private fun findOriginalEnterAction(component: JComponent): WrappedAction? {
 			var originalEnterAction: WrappedAction? = null
@@ -70,19 +65,20 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 		speedSearch?.addChangeListener {
 			if (it.propertyName == SpeedSearchSupply.ENTERED_PREFIX_PROPERTY_NAME && !speedSearch.isPopupActive) {
 				isSearching.set(false)
+				currentNode = rootNode
 			}
 		}
 	}
 	
 	protected fun getAllKeyStrokes(): Set<KeyStroke> {
-		return KeyStrokeNode.getAllKeyStrokes(rootNode, EXTRA_SHORTCUTS)
+		return KeyStrokeNode.getAllKeyStrokes(rootNode, setOf(ENTER_KEY))
 	}
 	
 	final override fun actionPerformed(e: AnActionEvent) {
 		val keyEvent = e.inputEvent as? KeyEvent ?: return
 		
-		if (keyEvent.id == KeyEvent.KEY_PRESSED && handleSpecialKeyPress(e, keyEvent)) {
-			currentNode = rootNode
+		if (keyEvent.id == KeyEvent.KEY_PRESSED && keyEvent.keyCode == KeyEvent.VK_ENTER) {
+			handleEnterKeyPress(e, keyEvent)
 			return
 		}
 		
@@ -95,19 +91,6 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 		}
 	}
 	
-	private fun handleSpecialKeyPress(actionEvent: AnActionEvent, keyEvent: KeyEvent): Boolean {
-		if (keyEvent.keyCode == KeyEvent.VK_ESCAPE) {
-			return true
-		}
-		
-		if (keyEvent.keyCode == KeyEvent.VK_ENTER) {
-			handleEnterKeyPress(actionEvent, keyEvent)
-			return true
-		}
-		
-		return false
-	}
-	
 	private fun handleEnterKeyPress(actionEvent: AnActionEvent, keyEvent: KeyEvent) {
 		if (isSearching.compareAndSet(true, false)) {
 			when (val supply = SpeedSearchSupply.getSupply(component)) {
@@ -116,6 +99,7 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 			}
 		}
 		else {
+			currentNode = rootNode
 			originalEnterAction?.perform(actionEvent, keyEvent)
 		}
 	}
