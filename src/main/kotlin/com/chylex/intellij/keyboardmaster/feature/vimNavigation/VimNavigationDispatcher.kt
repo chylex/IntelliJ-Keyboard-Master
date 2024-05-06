@@ -35,7 +35,7 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 				}
 				
 				container.getActionForKeyStroke(ENTER_KEY)?.let {
-					originalEnterAction = WrappedAction.ForActionListener(component, it)
+					originalEnterAction = WrappedAction.ForActionListener(container, it)
 				}
 				
 				for (action in ActionUtil.getActions(container)) {
