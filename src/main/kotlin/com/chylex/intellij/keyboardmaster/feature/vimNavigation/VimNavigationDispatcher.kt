@@ -2,13 +2,18 @@ package com.chylex.intellij.keyboardmaster.feature.vimNavigation
 
 import com.chylex.intellij.keyboardmaster.PluginDisposableService
 import com.intellij.openapi.actionSystem.ActionUpdateThread
+import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.KeyboardShortcut
+import com.intellij.openapi.actionSystem.ex.ActionUtil
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.toolWindow.InternalDecoratorImpl
 import com.intellij.ui.SpeedSearchBase
 import com.intellij.ui.speedSearch.SpeedSearch
 import com.intellij.ui.speedSearch.SpeedSearchSupply
+import com.intellij.util.containers.JBIterable
+import java.awt.Container
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import java.awt.event.KeyEvent
@@ -19,10 +24,34 @@ import javax.swing.KeyStroke
 internal open class VimNavigationDispatcher<T : JComponent>(final override val component: T, private val rootNode: KeyStrokeNode.Parent<VimNavigationDispatcher<T>>) : DumbAwareAction(), ComponentHolder {
 	companion object {
 		private val DISPOSABLE = ApplicationManager.getApplication().getService(PluginDisposableService::class.java)
+		
+		private val ENTER_KEY = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)
 		private val EXTRA_SHORTCUTS = setOf(
 			KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-			KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)
+			ENTER_KEY
 		)
+		
+		private fun findOriginalEnterAction(component: JComponent): WrappedAction? {
+			var originalEnterAction: WrappedAction? = null
+			
+			for (container in JBIterable.generate<Container>(component) { it.parent }) {
+				if (container !is JComponent) {
+					continue
+				}
+				
+				container.getActionForKeyStroke(ENTER_KEY)?.let {
+					originalEnterAction = WrappedAction.ForActionListener(component, it)
+				}
+				
+				for (action in ActionUtil.getActions(container)) {
+					if (action.shortcutSet.shortcuts.any { it is KeyboardShortcut && it.firstKeyStroke == ENTER_KEY && it.secondKeyStroke == null }) {
+						originalEnterAction = WrappedAction.ForAnAction(action)
+					}
+				}
+			}
+			
+			return originalEnterAction
+		}
 		
 		@Suppress("UnstableApiUsage")
 		fun JComponent.getParentToolWindowId(): String? {
@@ -30,7 +59,7 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 		}
 	}
 	
-	private val originalEnterAction: ActionListener? = component.getActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0))
+	private val originalEnterAction = findOriginalEnterAction(component)
 	private var currentNode: KeyStrokeNode.Parent<VimNavigationDispatcher<T>> = rootNode
 	var isSearching = AtomicBoolean(false)
 	
@@ -52,7 +81,7 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 	final override fun actionPerformed(e: AnActionEvent) {
 		val keyEvent = e.inputEvent as? KeyEvent ?: return
 		
-		if (keyEvent.id == KeyEvent.KEY_PRESSED && handleSpecialKeyPress(keyEvent)) {
+		if (keyEvent.id == KeyEvent.KEY_PRESSED && handleSpecialKeyPress(e, keyEvent)) {
 			currentNode = rootNode
 			return
 		}
@@ -66,20 +95,20 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 		}
 	}
 	
-	private fun handleSpecialKeyPress(keyEvent: KeyEvent): Boolean {
+	private fun handleSpecialKeyPress(actionEvent: AnActionEvent, keyEvent: KeyEvent): Boolean {
 		if (keyEvent.keyCode == KeyEvent.VK_ESCAPE) {
 			return true
 		}
 		
 		if (keyEvent.keyCode == KeyEvent.VK_ENTER) {
-			handleEnterKeyPress(ActionEvent(component, ActionEvent.ACTION_PERFORMED, "Enter", keyEvent.`when`, keyEvent.modifiersEx))
+			handleEnterKeyPress(actionEvent, keyEvent)
 			return true
 		}
 		
 		return false
 	}
 	
-	private fun handleEnterKeyPress(e: ActionEvent) {
+	private fun handleEnterKeyPress(actionEvent: AnActionEvent, keyEvent: KeyEvent) {
 		if (isSearching.compareAndSet(true, false)) {
 			when (val supply = SpeedSearchSupply.getSupply(component)) {
 				is SpeedSearchBase<*> -> supply.hidePopup()
@@ -87,7 +116,7 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 			}
 		}
 		else {
-			originalEnterAction?.actionPerformed(e)
+			originalEnterAction?.perform(actionEvent, keyEvent)
 		}
 	}
 	
@@ -97,5 +126,21 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 	
 	final override fun getActionUpdateThread(): ActionUpdateThread {
 		return ActionUpdateThread.BGT
+	}
+	
+	private sealed interface WrappedAction {
+		fun perform(actionEvent: AnActionEvent, keyEvent: KeyEvent)
+		
+		class ForActionListener(val component: JComponent, val listener: ActionListener) : WrappedAction {
+			override fun perform(actionEvent: AnActionEvent, keyEvent: KeyEvent) {
+				listener.actionPerformed(ActionEvent(component, ActionEvent.ACTION_PERFORMED, "Enter", keyEvent.`when`, keyEvent.modifiersEx))
+			}
+		}
+		
+		class ForAnAction(val action: AnAction) : WrappedAction {
+			override fun perform(actionEvent: AnActionEvent, keyEvent: KeyEvent) {
+				action.actionPerformed(actionEvent)
+			}
+		}
 	}
 }
