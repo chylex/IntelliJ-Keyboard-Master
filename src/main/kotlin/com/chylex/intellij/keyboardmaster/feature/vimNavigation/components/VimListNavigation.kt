@@ -34,6 +34,14 @@ internal object VimListNavigation {
 		)
 	)
 	
+	private val POPUP_LIST_ROOT_NODE = ROOT_NODE + Parent(
+		mapOf(
+			KeyStroke.getKeyStroke('o') to IdeaAction("List-selectNextColumn"),
+			KeyStroke.getKeyStroke('p') to IdeaAction("List-selectPreviousColumn"),
+			KeyStroke.getKeyStroke('x') to IdeaAction("List-selectPreviousColumn"),
+		)
+	)
+	
 	fun install(component: JList<*>) {
 		if (component.getUserData(KEY) == null && component.javaClass.enclosingClass.let { it == null || !WizardPopup::class.java.isAssignableFrom(it) }) {
 			component.putUserData(KEY, VimNavigationDispatcher(component, ROOT_NODE))
@@ -47,7 +55,7 @@ internal object VimListNavigation {
 	}
 	
 	@Suppress("serial")
-	private class VimPopupListNavigationDispatcher(component: JList<*>, override val popup: WizardPopup) : VimNavigationDispatcher<JList<*>>(component, ROOT_NODE) {
+	private class VimPopupListNavigationDispatcher(component: JList<*>, override val popup: WizardPopup) : VimNavigationDispatcher<JList<*>>(component, POPUP_LIST_ROOT_NODE) {
 		init {
 			val speedSearch = SpeedSearchSupply.getSupply(component, true) as? SpeedSearch
 			if (speedSearch != null) {

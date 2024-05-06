@@ -38,20 +38,11 @@ object VimNavigation {
 				val originalBindings = (UIManager.get("PopupMenu.selectedWindowInputMapBindings") as Array<*>).also { originalPopupBindings = it }
 				val updatedBindings = mutableListOf(*originalBindings)
 				
-				updatedBindings.add(KeyStroke.getKeyStroke('h'))
-				updatedBindings.add("selectParent")
-				
-				updatedBindings.add(KeyStroke.getKeyStroke('j'))
-				updatedBindings.add("selectNext")
-				
-				updatedBindings.add(KeyStroke.getKeyStroke('k'))
-				updatedBindings.add("selectPrevious")
-				
-				updatedBindings.add(KeyStroke.getKeyStroke('l'))
-				updatedBindings.add("selectChild")
-				
-				updatedBindings.add(KeyStroke.getKeyStroke('q'))
-				updatedBindings.add("cancel")
+				addBinding(updatedBindings, "selectParent", setOf('h', 'p', 'x'))
+				addBinding(updatedBindings, "selectNext", setOf('j'))
+				addBinding(updatedBindings, "selectPrevious", setOf('k'))
+				addBinding(updatedBindings, "selectChild", setOf('l', 'o'))
+				addBinding(updatedBindings, "cancel", setOf('q'))
 				
 				UIManager.put("PopupMenu.selectedWindowInputMapBindings", updatedBindings.toTypedArray())
 				UISettings.getInstance().disableMnemonics = true
@@ -59,6 +50,13 @@ object VimNavigation {
 			else {
 				UIManager.put("PopupMenu.selectedWindowInputMapBindings", originalPopupBindings)
 			}
+		}
+	}
+	
+	private fun addBinding(bindings: MutableList<Any?>, action: String, chars: Set<Char>) {
+		for (char in chars) {
+			bindings.add(KeyStroke.getKeyStroke(char))
+			bindings.add(action)
 		}
 	}
 	
