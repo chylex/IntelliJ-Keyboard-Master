@@ -17,6 +17,7 @@ import java.awt.Container
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import java.awt.event.KeyEvent
+import java.beans.PropertyChangeEvent
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.JComponent
 import javax.swing.KeyStroke
@@ -60,18 +61,24 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 	
 	init {
 		registerCustomShortcutSet(KeyStrokeNode.getAllShortcuts(getAllKeyStrokes()), component, DISPOSABLE)
-		
-		val speedSearch = SpeedSearchSupply.getSupply(component, true)
-		speedSearch?.addChangeListener {
-			if (it.propertyName == SpeedSearchSupply.ENTERED_PREFIX_PROPERTY_NAME && !speedSearch.isPopupActive) {
-				isSearching.set(false)
-				currentNode = rootNode
-			}
-		}
+		SpeedSearchSupply.getSupply(component, true)?.addChangeListener(::handleSpeedSearchChange)
 	}
 	
 	protected fun getAllKeyStrokes(): Set<KeyStroke> {
 		return KeyStrokeNode.getAllKeyStrokes(rootNode, setOf(ENTER_KEY))
+	}
+	
+	private fun handleSpeedSearchChange(e: PropertyChangeEvent) {
+		if (e.propertyName == SpeedSearchSupply.ENTERED_PREFIX_PROPERTY_NAME) {
+			val speedSearch = e.source as? SpeedSearchSupply ?: return
+			
+			ApplicationManager.getApplication().invokeLater {
+				if (!speedSearch.isPopupActive) {
+					isSearching.set(false)
+					currentNode = rootNode
+				}
+			}
+		}
 	}
 	
 	final override fun actionPerformed(e: AnActionEvent) {
