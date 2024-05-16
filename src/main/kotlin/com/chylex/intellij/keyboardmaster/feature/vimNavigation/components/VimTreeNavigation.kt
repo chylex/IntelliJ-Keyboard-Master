@@ -85,7 +85,7 @@ internal object VimTreeNavigation {
 			val parentPath = path.parentPath ?: return
 			val parentRow = tree.getRowForPath(parentPath)
 			
-			tree.setSelectionRow(parentRow + 1)
+			selectRow(tree, parentRow + 1)
 		}
 	}
 	
@@ -111,7 +111,12 @@ internal object VimTreeNavigation {
 				}
 			}
 			
-			tree.setSelectionRow(targetRow)
+			selectRow(tree, targetRow)
 		}
+	}
+	
+	private fun selectRow(tree: JTree, row: Int) {
+		tree.setSelectionRow(row)
+		tree.scrollRowToVisible(row)
 	}
 }
