@@ -4,6 +4,7 @@ import com.chylex.intellij.keyboardmaster.PluginDisposableService
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.KeyboardShortcut
 import com.intellij.openapi.actionSystem.ex.ActionUtil
 import com.intellij.openapi.application.ApplicationManager
@@ -112,7 +113,16 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 	}
 	
 	final override fun update(e: AnActionEvent) {
-		e.presentation.isEnabled = !isSearching.get() || e.inputEvent.let { it is KeyEvent && it.id == KeyEvent.KEY_PRESSED && it.keyCode == KeyEvent.VK_ENTER }
+		e.presentation.isEnabled = !ignoreEventDueToActiveSearch(e) && !ignoreEventDueToActiveEditing(e)
+	}
+	
+	private fun ignoreEventDueToActiveSearch(e: AnActionEvent): Boolean {
+		return isSearching.get() && !e.inputEvent.let { it is KeyEvent && it.id == KeyEvent.KEY_PRESSED && it.keyCode == KeyEvent.VK_ENTER }
+	}
+	
+	private fun ignoreEventDueToActiveEditing(e: AnActionEvent): Boolean {
+		// Avoid stealing keys from inline text fields.
+		return e.dataContext.getData(CommonDataKeys.EDITOR) != null
 	}
 	
 	final override fun getActionUpdateThread(): ActionUpdateThread {
