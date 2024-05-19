@@ -1,6 +1,7 @@
 package com.chylex.intellij.keyboardmaster.feature.vimNavigation
 
 import com.chylex.intellij.keyboardmaster.PluginDisposableService
+import com.chylex.intellij.keyboardmaster.feature.vimNavigation.VimNavigationDispatcher.WrappedAction.ForKeyListener
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -20,6 +21,7 @@ import java.awt.event.ActionListener
 import java.awt.event.KeyEvent
 import java.beans.PropertyChangeEvent
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.swing.Action
 import javax.swing.JComponent
 import javax.swing.KeyStroke
 
@@ -28,7 +30,7 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 		private val DISPOSABLE = ApplicationManager.getApplication().getService(PluginDisposableService::class.java)
 		private val ENTER_KEY = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)
 		
-		private fun findOriginalEnterAction(component: JComponent): WrappedAction? {
+		private fun findOriginalEnterAction(component: JComponent): WrappedAction {
 			var originalEnterAction: WrappedAction? = null
 			
 			for (container in JBIterable.generate<Container>(component) { it.parent }) {
@@ -36,7 +38,7 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 					continue
 				}
 				
-				container.getActionForKeyStroke(ENTER_KEY)?.let {
+				container.getActionForKeyStroke(ENTER_KEY)?.takeUnless(::isIgnoredEnterAction)?.let {
 					originalEnterAction = WrappedAction.ForActionListener(container, it)
 				}
 				
@@ -47,7 +49,11 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 				}
 			}
 			
-			return originalEnterAction
+			return originalEnterAction ?: ForKeyListener(component)
+		}
+		
+		private fun isIgnoredEnterAction(action: ActionListener): Boolean {
+			return action is Action && action.getValue(Action.NAME) == "toggle"
 		}
 		
 		@Suppress("UnstableApiUsage")
@@ -108,7 +114,7 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 		}
 		else {
 			currentNode = rootNode
-			originalEnterAction?.perform(actionEvent, keyEvent)
+			originalEnterAction.perform(actionEvent, keyEvent)
 		}
 	}
 	
@@ -132,7 +138,7 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 	private sealed interface WrappedAction {
 		fun perform(actionEvent: AnActionEvent, keyEvent: KeyEvent)
 		
-		class ForActionListener(val component: JComponent, val listener: ActionListener) : WrappedAction {
+		class ForActionListener(private val component: JComponent, private val listener: ActionListener) : WrappedAction {
 			override fun perform(actionEvent: AnActionEvent, keyEvent: KeyEvent) {
 				listener.actionPerformed(ActionEvent(component, ActionEvent.ACTION_PERFORMED, "Enter", keyEvent.`when`, keyEvent.modifiersEx))
 			}
@@ -141,6 +147,13 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 		class ForAnAction(val action: AnAction) : WrappedAction {
 			override fun perform(actionEvent: AnActionEvent, keyEvent: KeyEvent) {
 				action.actionPerformed(actionEvent)
+			}
+		}
+		
+		class ForKeyListener(private val component: JComponent) : WrappedAction {
+			override fun perform(actionEvent: AnActionEvent, keyEvent: KeyEvent) {
+				val unconsumedKeyEvent = KeyEvent(component, keyEvent.id, keyEvent.`when`, keyEvent.modifiersEx, keyEvent.keyCode, keyEvent.keyChar, keyEvent.keyLocation)
+				component.dispatchEvent(unconsumedKeyEvent)
 			}
 		}
 	}
