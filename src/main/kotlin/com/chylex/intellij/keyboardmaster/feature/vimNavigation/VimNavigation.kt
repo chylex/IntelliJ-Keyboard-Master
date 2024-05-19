@@ -18,8 +18,11 @@ import javax.swing.KeyStroke
 import javax.swing.UIManager
 
 object VimNavigation {
-	private val isEnabled = AtomicBoolean(false)
+	private val isEnabledFlag = AtomicBoolean(false)
 	private var originalPopupBindings: Array<*>? = null
+	
+	val isEnabled
+		get() = isEnabledFlag.get()
 	
 	fun register() {
 		val disposable = ApplicationManager.getApplication().getService(PluginDisposableService::class.java)
@@ -29,7 +32,7 @@ object VimNavigation {
 	}
 	
 	fun setEnabled(enabled: Boolean) {
-		if (!isEnabled.compareAndSet(!enabled, enabled)) {
+		if (!isEnabledFlag.compareAndSet(!enabled, enabled)) {
 			return
 		}
 		
@@ -61,7 +64,7 @@ object VimNavigation {
 	}
 	
 	private fun handleEvent(event: AWTEvent) {
-		if (event is FocusEvent && event.id == FocusEvent.FOCUS_GAINED && isEnabled.get()) {
+		if (event is FocusEvent && event.id == FocusEvent.FOCUS_GAINED && isEnabled) {
 			when (val source = event.source) {
 				is JList<*> -> VimListNavigation.install(source)
 				is JTree    -> VimTreeNavigation.install(source)

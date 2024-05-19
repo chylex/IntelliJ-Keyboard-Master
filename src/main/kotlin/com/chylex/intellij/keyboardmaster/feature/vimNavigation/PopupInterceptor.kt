@@ -8,7 +8,7 @@ import com.intellij.ui.popup.list.ListPopupImpl
 
 internal object PopupInterceptor : PersistentUiInterceptor<AbstractPopup>(AbstractPopup::class.java) {
 	override fun shouldIntercept(component: AbstractPopup): Boolean {
-		if (component is ListPopupImpl) {
+		if (component is ListPopupImpl && VimNavigation.isEnabled) {
 			VimListNavigation.install(component.list, component)
 		}
 		
