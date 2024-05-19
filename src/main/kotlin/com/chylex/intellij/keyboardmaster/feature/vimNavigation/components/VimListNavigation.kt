@@ -8,6 +8,7 @@ import com.intellij.openapi.ui.getUserData
 import com.intellij.openapi.ui.putUserData
 import com.intellij.openapi.util.Key
 import com.intellij.ui.popup.WizardPopup
+import com.intellij.ui.popup.list.ListPopupImpl
 import com.intellij.ui.speedSearch.SpeedSearch
 import com.intellij.ui.speedSearch.SpeedSearchSupply
 import java.awt.event.ActionEvent
@@ -85,6 +86,24 @@ internal object VimListNavigation {
 			// WizardPopup only checks key codes against its input map, but key codes may be undefined for some characters.
 			popup.registerAction("KeyboardMaster-VimListNavigation-PauseSpeedSearch", KeyStroke.getKeyStroke(KeyEvent.CHAR_UNDEFINED, 0), pauseAction)
 			popup.registerAction("KeyboardMaster-VimListNavigation-PauseSpeedSearch", KeyStroke.getKeyStroke(KeyEvent.CHAR_UNDEFINED, KeyEvent.SHIFT_DOWN_MASK), pauseAction)
+			
+			if (popup is ListPopupImpl) {
+				popup.registerAction("KeyboardMaster-VimListNavigation-Enter", ENTER_KEY, object : AbstractAction() {
+					override fun actionPerformed(e: ActionEvent) {
+						handleEnterKeyPress { popup.handleSelect(true, createEnterEvent(e)) }
+					}
+					
+					private fun createEnterEvent(e: ActionEvent): KeyEvent {
+						return KeyEvent(component, KeyEvent.KEY_PRESSED, e.`when`, e.modifiers, KeyEvent.VK_ENTER, KeyEvent.CHAR_UNDEFINED)
+					}
+				})
+			}
+		}
+		
+		override fun stopSpeedSearch() {
+			val selectedValue = component.selectedValue
+			super.stopSpeedSearch()
+			component.setSelectedValue(selectedValue, true)
 		}
 		
 		private class PauseSpeedSearchAction(private val dispatcher: VimNavigationDispatcher<JList<*>>, private val speedSearch: SpeedSearch) : AbstractAction() {

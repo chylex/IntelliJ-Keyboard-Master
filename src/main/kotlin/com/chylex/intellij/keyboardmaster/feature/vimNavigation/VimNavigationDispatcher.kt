@@ -28,7 +28,9 @@ import javax.swing.KeyStroke
 internal open class VimNavigationDispatcher<T : JComponent>(final override val component: T, private val rootNode: KeyStrokeNode.Parent<VimNavigationDispatcher<T>>) : DumbAwareAction(), ComponentHolder {
 	companion object {
 		private val DISPOSABLE = ApplicationManager.getApplication().getService(PluginDisposableService::class.java)
-		private val ENTER_KEY = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)
+		
+		@JvmStatic
+		protected val ENTER_KEY: KeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)
 		
 		private fun findOriginalEnterAction(component: JComponent): WrappedAction {
 			var originalEnterAction: WrappedAction? = null
@@ -106,15 +108,23 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 	}
 	
 	private fun handleEnterKeyPress(actionEvent: AnActionEvent, keyEvent: KeyEvent) {
+		handleEnterKeyPress { originalEnterAction.perform(actionEvent, keyEvent) }
+	}
+	
+	protected inline fun handleEnterKeyPress(originalAction: () -> Unit) {
 		if (isSearching.compareAndSet(true, false)) {
-			when (val supply = SpeedSearchSupply.getSupply(component)) {
-				is SpeedSearchBase<*> -> supply.hidePopup()
-				is SpeedSearch        -> supply.reset()
-			}
+			stopSpeedSearch()
 		}
 		else {
 			currentNode = rootNode
-			originalEnterAction.perform(actionEvent, keyEvent)
+			originalAction()
+		}
+	}
+	
+	protected open fun stopSpeedSearch() {
+		when (val supply = SpeedSearchSupply.getSupply(component)) {
+			is SpeedSearchBase<*> -> supply.hidePopup()
+			is SpeedSearch        -> supply.reset()
 		}
 	}
 	
