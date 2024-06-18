@@ -90,7 +90,7 @@ internal object VimListNavigation {
 			if (popup is ListPopupImpl) {
 				popup.registerAction("KeyboardMaster-VimListNavigation-Enter", ENTER_KEY, object : AbstractAction() {
 					override fun actionPerformed(e: ActionEvent) {
-						handleEnterKeyPress { popup.handleSelect(true, createEnterEvent(e)) }
+						handleEnterKeyPress(createEnterEvent(e)) { popup.handleSelect(true, it) }
 					}
 					
 					private fun createEnterEvent(e: ActionEvent): KeyEvent {

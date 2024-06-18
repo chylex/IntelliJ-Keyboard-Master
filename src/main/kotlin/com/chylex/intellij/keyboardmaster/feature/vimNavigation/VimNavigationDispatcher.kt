@@ -10,6 +10,7 @@ import com.intellij.openapi.actionSystem.KeyboardShortcut
 import com.intellij.openapi.actionSystem.ex.ActionUtil
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.DumbAwareAction
+import com.intellij.openapi.util.SystemInfo
 import com.intellij.toolWindow.InternalDecoratorImpl
 import com.intellij.ui.SpeedSearchBase
 import com.intellij.ui.speedSearch.SpeedSearch
@@ -31,6 +32,9 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 		
 		@JvmStatic
 		protected val ENTER_KEY: KeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)
+		
+		private val CTRL_ENTER_KEY: KeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, KeyEvent.CTRL_DOWN_MASK)
+		private val META_ENTER_KEY: KeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, KeyEvent.META_DOWN_MASK)
 		
 		private fun findOriginalEnterAction(component: JComponent): WrappedAction {
 			var originalEnterAction: WrappedAction? = null
@@ -74,7 +78,7 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 	}
 	
 	protected fun getAllKeyStrokes(): Set<KeyStroke> {
-		return KeyStrokeNode.getAllKeyStrokes(rootNode, setOf(ENTER_KEY))
+		return KeyStrokeNode.getAllKeyStrokes(rootNode, setOf(ENTER_KEY, CTRL_ENTER_KEY, META_ENTER_KEY))
 	}
 	
 	private fun handleSpeedSearchChange(e: PropertyChangeEvent) {
@@ -108,17 +112,21 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 	}
 	
 	private fun handleEnterKeyPress(actionEvent: AnActionEvent, keyEvent: KeyEvent) {
-		handleEnterKeyPress { originalEnterAction.perform(actionEvent, keyEvent) }
+		handleEnterKeyPress(keyEvent) { originalEnterAction.perform(actionEvent, it) }
 	}
 	
-	protected inline fun handleEnterKeyPress(originalAction: () -> Unit) {
-		if (isSearching.compareAndSet(true, false)) {
+	protected inline fun handleEnterKeyPress(keyEvent: KeyEvent, originalAction: (KeyEvent) -> Unit) {
+		if (isSearching.compareAndSet(true, false) && !runEnterActionImmediately(keyEvent)) {
 			stopSpeedSearch()
 		}
 		else {
 			currentNode = rootNode
-			originalAction()
+			originalAction(keyEvent)
 		}
+	}
+	
+	private fun runEnterActionImmediately(keyEvent: KeyEvent): Boolean {
+		return if (SystemInfo.isMac) keyEvent.isMetaDown else keyEvent.isControlDown
 	}
 	
 	protected open fun stopSpeedSearch() {
