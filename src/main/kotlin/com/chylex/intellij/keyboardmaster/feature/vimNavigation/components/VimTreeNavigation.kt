@@ -8,9 +8,12 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.ui.getUserData
 import com.intellij.openapi.ui.putUserData
 import com.intellij.openapi.util.Key
+import com.intellij.ui.ClientProperty
+import com.intellij.ui.tree.ui.DefaultTreeUI
 import java.awt.event.KeyEvent
 import javax.swing.JTree
 import javax.swing.KeyStroke
+import javax.swing.tree.TreePath
 
 internal object VimTreeNavigation {
 	private val KEY = Key.create<VimNavigationDispatcher<JTree>>("KeyboardMaster-VimTreeNavigation")
@@ -22,6 +25,7 @@ internal object VimTreeNavigation {
 					KeyStroke.getKeyStroke('g') to IdeaAction("Tree-selectFirst"),
 					KeyStroke.getKeyStroke('j') to SelectLastSibling,
 					KeyStroke.getKeyStroke('k') to SelectFirstSibling,
+					KeyStroke.getKeyStroke('o') to ExpandTreeNodeChildrenToNextLevel,
 				)
 			),
 			KeyStroke.getKeyStroke('G') to IdeaAction("Tree-selectLast"),
@@ -73,6 +77,48 @@ internal object VimTreeNavigation {
 				if (parentPath.parentPath != null || tree.isRootVisible) {
 					tree.collapsePath(parentPath)
 				}
+			}
+		}
+	}
+	
+	private data object ExpandTreeNodeChildrenToNextLevel : ActionNode<VimNavigationDispatcher<JTree>> {
+		override fun performAction(holder: VimNavigationDispatcher<JTree>, actionEvent: AnActionEvent, keyEvent: KeyEvent) {
+			val tree = holder.component
+			val model = tree.model
+			val path = tree.selectionPath?.takeUnless { model.isLeaf(it.lastPathComponent) } ?: return
+			
+			var pathsToExpand = mutableListOf(path)
+			
+			do {
+				if (pathsToExpand.any(tree::isCollapsed)) {
+					runWithoutAutoExpand(tree) { pathsToExpand.forEach(tree::expandPath) }
+					break
+				}
+				
+				val nextPathsToExpand = mutableListOf<TreePath>()
+				
+				for (parentPath in pathsToExpand) {
+					val lastPathComponent = parentPath.lastPathComponent
+					
+					for (i in 0 until model.getChildCount(lastPathComponent)) {
+						val child = model.getChild(lastPathComponent, i)
+						if (!model.isLeaf(child)) {
+							nextPathsToExpand.add(parentPath.pathByAddingChild(child))
+						}
+					}
+				}
+				
+				pathsToExpand = nextPathsToExpand
+			} while (pathsToExpand.isNotEmpty())
+		}
+		
+		private inline fun runWithoutAutoExpand(tree: JTree, action: () -> Unit) {
+			val previousAutoExpandValue = ClientProperty.get(tree, DefaultTreeUI.AUTO_EXPAND_ALLOWED)
+			ClientProperty.put(tree, DefaultTreeUI.AUTO_EXPAND_ALLOWED, false)
+			try {
+				action()
+			} finally {
+				ClientProperty.put(tree, DefaultTreeUI.AUTO_EXPAND_ALLOWED, previousAutoExpandValue)
 			}
 		}
 	}
