@@ -70,14 +70,19 @@ internal object VimTreeNavigation {
 			val path = tree.selectionPath ?: return
 			
 			if (tree.isExpanded(path)) {
-				tree.collapsePath(path)
+				collapseAndScroll(tree, path)
 			}
 			else {
 				val parentPath = path.parentPath
 				if (parentPath.parentPath != null || tree.isRootVisible) {
-					tree.collapsePath(parentPath)
+					collapseAndScroll(tree, parentPath)
 				}
 			}
+		}
+		
+		private fun collapseAndScroll(tree: JTree, path: TreePath) {
+			tree.collapsePath(path)
+			tree.scrollRowToVisible(tree.getRowForPath(path))
 		}
 	}
 	
