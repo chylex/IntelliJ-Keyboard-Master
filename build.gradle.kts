@@ -16,7 +16,7 @@ repositories {
 
 intellij {
 	type.set("IU")
-	version.set("2024.1.1")
+	version.set("2024.2")
 	updateSinceUntilBuild.set(false)
 	
 	plugins.add("com.intellij.java")
@@ -35,7 +35,7 @@ dependencies {
 }
 
 tasks.patchPluginXml {
-	sinceBuild.set("241")
+	sinceBuild.set("242")
 }
 
 tasks.test {

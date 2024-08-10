@@ -1,13 +1,13 @@
 package com.chylex.intellij.keyboardmaster.feature.codeCompletion
 
-import com.intellij.util.containers.IntIntHashMap
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap
 
 object CodeCompletionPopupConfiguration {
 	const val SHORTCUT_NONE = -1
 	const val SHORTCUT_NEXT_PAGE = -2
 	const val SHORTCUT_PREV_PAGE = -3
 	
-	private val charToShortcutMap = IntIntHashMap(16, SHORTCUT_NONE)
+	private val charToShortcutMap = Int2IntOpenHashMap(16).also { it.defaultReturnValue(SHORTCUT_NONE) }
 	private var hintTexts = mutableListOf<String>()
 	
 	val itemShortcutCount

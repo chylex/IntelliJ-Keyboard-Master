@@ -28,7 +28,8 @@ import javax.swing.KeyStroke
 
 internal open class VimNavigationDispatcher<T : JComponent>(final override val component: T, private val rootNode: KeyStrokeNode.Parent<VimNavigationDispatcher<T>>) : DumbAwareAction(), ComponentHolder {
 	companion object {
-		private val DISPOSABLE = ApplicationManager.getApplication().getService(PluginDisposableService::class.java)
+		private val DISPOSABLE
+			get() = ApplicationManager.getApplication().getService(PluginDisposableService::class.java)
 		
 		@JvmStatic
 		protected val ENTER_KEY: KeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)

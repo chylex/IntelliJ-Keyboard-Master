@@ -52,7 +52,7 @@ class GotoTypeInFileHandler(private val forward: Boolean) : CodeInsightActionHan
 	
 	private companion object {
 		fun getNavigationOffsets(file: PsiFile, searchedOffsetRange: IntRange): IntArray {
-			val structureViewBuilder = LanguageStructureViewBuilder.INSTANCE.getStructureViewBuilder(file)
+			val structureViewBuilder = LanguageStructureViewBuilder.getInstance().getStructureViewBuilder(file)
 			if (structureViewBuilder !is TreeBasedStructureViewBuilder) {
 				return intArrayOf()
 			}

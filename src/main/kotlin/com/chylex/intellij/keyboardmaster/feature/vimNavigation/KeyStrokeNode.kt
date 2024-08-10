@@ -59,7 +59,7 @@ internal interface KeyStrokeNode<T> {
 		override fun performAction(holder: T, actionEvent: AnActionEvent, keyEvent: KeyEvent) {
 			val action = actionEvent.actionManager.getAction(name) ?: return
 			
-			val dataContext = CustomizedDataContext.create(actionEvent.dataContext) {
+			val dataContext = CustomizedDataContext.withProvider(actionEvent.dataContext) {
 				when {
 					PlatformDataKeys.CONTEXT_COMPONENT.`is`(it) -> holder.component
 					else                                        -> null
