@@ -27,7 +27,7 @@ object VimNavigation {
 	fun register() {
 		val disposable = ApplicationManager.getApplication().getService(PluginDisposableService::class.java)
 		
-		StartupUiUtil.addAwtListener(::handleEvent, AWTEvent.FOCUS_EVENT_MASK, disposable)
+		StartupUiUtil.addAwtListener(AWTEvent.FOCUS_EVENT_MASK, disposable, ::handleEvent)
 		UiInterceptors.registerPersistent(disposable, PopupInterceptor)
 	}
 	

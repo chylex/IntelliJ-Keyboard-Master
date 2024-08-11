@@ -60,7 +60,7 @@ internal object VimListNavigation {
 	}
 	
 	@Suppress("serial")
-	private class VimPopupListNavigationDispatcher(component: JList<*>, override val popup: WizardPopup) : VimNavigationDispatcher<JList<*>>(component, POPUP_LIST_ROOT_NODE) {
+	private class VimPopupListNavigationDispatcher(component: JList<*>, override val popup: WizardPopup) : VimNavigationDispatcher<JList<*>>(component, POPUP_LIST_ROOT_NODE, popup.parent) {
 		init {
 			val speedSearch = SpeedSearchSupply.getSupply(component, true) as? SpeedSearch
 			if (speedSearch != null) {

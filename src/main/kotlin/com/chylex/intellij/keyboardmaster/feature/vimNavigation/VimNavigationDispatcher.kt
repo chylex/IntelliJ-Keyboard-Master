@@ -1,7 +1,7 @@
 package com.chylex.intellij.keyboardmaster.feature.vimNavigation
 
-import com.chylex.intellij.keyboardmaster.PluginDisposableService
 import com.chylex.intellij.keyboardmaster.feature.vimNavigation.VimNavigationDispatcher.WrappedAction.ForKeyListener
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -26,11 +26,8 @@ import javax.swing.Action
 import javax.swing.JComponent
 import javax.swing.KeyStroke
 
-internal open class VimNavigationDispatcher<T : JComponent>(final override val component: T, private val rootNode: KeyStrokeNode.Parent<VimNavigationDispatcher<T>>) : DumbAwareAction(), ComponentHolder {
+internal open class VimNavigationDispatcher<T : JComponent>(final override val component: T, private val rootNode: KeyStrokeNode.Parent<VimNavigationDispatcher<T>>, disposable: Disposable? = null) : DumbAwareAction(), ComponentHolder {
 	companion object {
-		private val DISPOSABLE
-			get() = ApplicationManager.getApplication().getService(PluginDisposableService::class.java)
-		
 		@JvmStatic
 		protected val ENTER_KEY: KeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)
 		
@@ -74,7 +71,7 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 	var isSearching = AtomicBoolean(false)
 	
 	init {
-		registerCustomShortcutSet(KeyStrokeNode.getAllShortcuts(getAllKeyStrokes()), component, DISPOSABLE)
+		registerCustomShortcutSet(KeyStrokeNode.getAllShortcuts(getAllKeyStrokes()), component, disposable)
 		SpeedSearchSupply.getSupply(component, true)?.addChangeListener(::handleSpeedSearchChange)
 	}
 	
