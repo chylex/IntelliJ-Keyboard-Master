@@ -59,7 +59,7 @@ internal object VimTreeNavigation {
 				tree.collapsePath(path)
 			}
 			else {
-				tree.expandPath(path)
+				runWithoutAutoExpand(tree) { tree.expandPath(path) }
 			}
 		}
 	}
@@ -116,16 +116,6 @@ internal object VimTreeNavigation {
 				pathsToExpand = nextPathsToExpand
 			} while (pathsToExpand.isNotEmpty())
 		}
-		
-		private inline fun runWithoutAutoExpand(tree: JTree, action: () -> Unit) {
-			val previousAutoExpandValue = ClientProperty.get(tree, DefaultTreeUI.AUTO_EXPAND_ALLOWED)
-			ClientProperty.put(tree, DefaultTreeUI.AUTO_EXPAND_ALLOWED, false)
-			try {
-				action()
-			} finally {
-				ClientProperty.put(tree, DefaultTreeUI.AUTO_EXPAND_ALLOWED, previousAutoExpandValue)
-			}
-		}
 	}
 	
 	private data object SelectFirstSibling : ActionNode<VimNavigationDispatcher<JTree>> {
@@ -163,6 +153,16 @@ internal object VimTreeNavigation {
 			}
 			
 			selectRow(tree, targetRow)
+		}
+	}
+	
+	private inline fun runWithoutAutoExpand(tree: JTree, action: () -> Unit) {
+		val previousAutoExpandValue = ClientProperty.get(tree, DefaultTreeUI.AUTO_EXPAND_ALLOWED)
+		ClientProperty.put(tree, DefaultTreeUI.AUTO_EXPAND_ALLOWED, false)
+		try {
+			action()
+		} finally {
+			ClientProperty.put(tree, DefaultTreeUI.AUTO_EXPAND_ALLOWED, previousAutoExpandValue)
 		}
 	}
 	
