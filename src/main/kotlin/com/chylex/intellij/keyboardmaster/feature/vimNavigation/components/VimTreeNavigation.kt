@@ -44,7 +44,7 @@ internal object VimTreeNavigation {
 			KeyStroke.getKeyStroke('p') to IdeaAction("Tree-selectParentNoCollapse"),
 			KeyStroke.getKeyStroke('P') to IdeaAction("Tree-selectFirst"),
 			KeyStroke.getKeyStroke('x') to CollapseSelfOrParentNode,
-			KeyStroke.getKeyStroke('X') to IdeaAction("CollapseTreeNode"),
+			KeyStroke.getKeyStroke('X') to CollapseAll,
 		)
 	)
 	
@@ -138,6 +138,21 @@ internal object VimTreeNavigation {
 			}
 			
 			collapseAndScroll(tree, parentPath)
+		}
+	}
+	
+	private data object CollapseAll : ActionNode<VimNavigationDispatcher<JTree>> {
+		override fun performAction(holder: VimNavigationDispatcher<JTree>, actionEvent: AnActionEvent, keyEvent: KeyEvent) {
+			val tree = holder.component
+			
+			CollapseUntilRootNode.performAction(holder, actionEvent, keyEvent)
+			
+			var row = 0
+			
+			while (row < tree.rowCount) {
+				tree.collapseRow(row)
+				row++
+			}
 		}
 	}
 	
