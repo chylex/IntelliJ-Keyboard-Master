@@ -25,16 +25,20 @@ internal object VimTreeNavigation {
 					KeyStroke.getKeyStroke('g') to IdeaAction("Tree-selectFirst"),
 					KeyStroke.getKeyStroke('j') to SelectLastSibling,
 					KeyStroke.getKeyStroke('k') to SelectFirstSibling,
-					KeyStroke.getKeyStroke('o') to ExpandTreeNodeChildrenToNextLevel,
+					KeyStroke.getKeyStroke('o') to ExpandChildrenToNextLevel,
 				)
 			),
 			KeyStroke.getKeyStroke('G') to IdeaAction("Tree-selectLast"),
+			KeyStroke.getKeyStroke('h') to CollapseSelfOrMoveToParentNode,
+			KeyStroke.getKeyStroke('H') to CollapseUntilRootNode,
 			KeyStroke.getKeyStroke('j') to IdeaAction("Tree-selectNext"),
 			KeyStroke.getKeyStroke('j', KeyEvent.ALT_DOWN_MASK) to IdeaAction("Tree-selectNextSibling"),
 			KeyStroke.getKeyStroke('J') to IdeaAction("Tree-selectNextExtendSelection"),
 			KeyStroke.getKeyStroke('k') to IdeaAction("Tree-selectPrevious"),
 			KeyStroke.getKeyStroke('k', KeyEvent.ALT_DOWN_MASK) to IdeaAction("Tree-selectPreviousSibling"),
 			KeyStroke.getKeyStroke('K') to IdeaAction("Tree-selectPreviousExtendSelection"),
+			KeyStroke.getKeyStroke('l') to ExpandSelfOrMoveToFirstChildNode,
+			KeyStroke.getKeyStroke('L') to ExpandUntilFirstLeafNode,
 			KeyStroke.getKeyStroke('o') to ExpandOrCollapseTreeNode,
 			KeyStroke.getKeyStroke('O') to IdeaAction("FullyExpandTreeNode"),
 			KeyStroke.getKeyStroke('p') to IdeaAction("Tree-selectParentNoCollapse"),
@@ -64,6 +68,50 @@ internal object VimTreeNavigation {
 		}
 	}
 	
+	private data object ExpandSelfOrMoveToFirstChildNode : ActionNode<VimNavigationDispatcher<JTree>> {
+		override fun performAction(holder: VimNavigationDispatcher<JTree>, actionEvent: AnActionEvent, keyEvent: KeyEvent) {
+			val tree = holder.component
+			val path = tree.selectionPath?.takeUnless { isLeaf(tree, it) } ?: return
+			
+			if (tree.isExpanded(path)) {
+				selectRow(tree, getFirstChild(tree, path))
+			}
+			else {
+				runWithoutAutoExpand(tree) { tree.expandPath(path) }
+			}
+		}
+	}
+	
+	private data object ExpandUntilFirstLeafNode : ActionNode<VimNavigationDispatcher<JTree>> {
+		override fun performAction(holder: VimNavigationDispatcher<JTree>, actionEvent: AnActionEvent, keyEvent: KeyEvent) {
+			val tree = holder.component
+			val path = tree.selectionPath ?: return
+			
+			var firstChildPath = path
+			
+			while (!isLeaf(tree, firstChildPath)) {
+				tree.expandPath(firstChildPath)
+				firstChildPath = getFirstChild(tree, firstChildPath)
+			}
+			
+			selectRow(tree, firstChildPath)
+		}
+	}
+	
+	private data object CollapseSelfOrMoveToParentNode : ActionNode<VimNavigationDispatcher<JTree>> {
+		override fun performAction(holder: VimNavigationDispatcher<JTree>, actionEvent: AnActionEvent, keyEvent: KeyEvent) {
+			val tree = holder.component
+			val path = tree.selectionPath ?: return
+			
+			if (tree.isExpanded(path)) {
+				collapseAndScroll(tree, path)
+			}
+			else {
+				withParentPath(tree, path) { selectRow(tree, it) }
+			}
+		}
+	}
+	
 	private data object CollapseSelfOrParentNode : ActionNode<VimNavigationDispatcher<JTree>> {
 		override fun performAction(holder: VimNavigationDispatcher<JTree>, actionEvent: AnActionEvent, keyEvent: KeyEvent) {
 			val tree = holder.component
@@ -73,24 +121,31 @@ internal object VimTreeNavigation {
 				collapseAndScroll(tree, path)
 			}
 			else {
-				val parentPath = path.parentPath
-				if (parentPath.parentPath != null || tree.isRootVisible) {
-					collapseAndScroll(tree, parentPath)
-				}
+				withParentPath(tree, path) { collapseAndScroll(tree, it) }
 			}
-		}
-		
-		private fun collapseAndScroll(tree: JTree, path: TreePath) {
-			tree.collapsePath(path)
-			tree.scrollRowToVisible(tree.getRowForPath(path))
 		}
 	}
 	
-	private data object ExpandTreeNodeChildrenToNextLevel : ActionNode<VimNavigationDispatcher<JTree>> {
+	private data object CollapseUntilRootNode : ActionNode<VimNavigationDispatcher<JTree>> {
+		override fun performAction(holder: VimNavigationDispatcher<JTree>, actionEvent: AnActionEvent, keyEvent: KeyEvent) {
+			val tree = holder.component
+			val path = tree.selectionPath ?: return
+			
+			var parentPath = path
+			
+			while (true) {
+				parentPath = parentPath.parentPath.takeUnless { isInvisibleRoot(tree, it) } ?: break
+			}
+			
+			collapseAndScroll(tree, parentPath)
+		}
+	}
+	
+	private data object ExpandChildrenToNextLevel : ActionNode<VimNavigationDispatcher<JTree>> {
 		override fun performAction(holder: VimNavigationDispatcher<JTree>, actionEvent: AnActionEvent, keyEvent: KeyEvent) {
 			val tree = holder.component
 			val model = tree.model
-			val path = tree.selectionPath?.takeUnless { model.isLeaf(it.lastPathComponent) } ?: return
+			val path = tree.selectionPath?.takeUnless { isLeaf(tree, it) } ?: return
 			
 			var pathsToExpand = mutableListOf(path)
 			
@@ -169,5 +224,33 @@ internal object VimTreeNavigation {
 	private fun selectRow(tree: JTree, row: Int) {
 		tree.setSelectionRow(row)
 		tree.scrollRowToVisible(row)
+	}
+	
+	private fun selectRow(tree: JTree, path: TreePath) {
+		selectRow(tree, tree.getRowForPath(path))
+	}
+	
+	private fun collapseAndScroll(tree: JTree, path: TreePath) {
+		tree.collapsePath(path)
+		tree.scrollRowToVisible(tree.getRowForPath(path))
+	}
+	
+	private inline fun withParentPath(tree: JTree, path: TreePath, action: (TreePath) -> Unit) {
+		val parentPath = path.parentPath
+		if (!isInvisibleRoot(tree, parentPath)) {
+			action(parentPath)
+		}
+	}
+	
+	private fun isInvisibleRoot(tree: JTree, parentPath: TreePath): Boolean {
+		return parentPath.parentPath == null && !tree.isRootVisible
+	}
+	
+	private fun getFirstChild(tree: JTree, path: TreePath): TreePath {
+		return path.pathByAddingChild(tree.model.getChild(path.lastPathComponent, 0))
+	}
+	
+	private fun isLeaf(tree: JTree, firstChildPath: TreePath): Boolean {
+		return tree.model.isLeaf(firstChildPath.lastPathComponent)
 	}
 }
