@@ -1,10 +1,8 @@
 @file:Suppress("ConvertLambdaToReference")
 
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-	kotlin("jvm") version "1.9.22"
-	id("org.jetbrains.intellij") version "1.17.3"
+	kotlin("jvm")
+	id("org.jetbrains.intellij.platform")
 }
 
 group = "com.chylex.intellij.keyboardmaster"
@@ -12,38 +10,47 @@ version = "0.6.2"
 
 repositories {
 	mavenCentral()
+	
+	intellijPlatform {
+		defaultRepositories()
+	}
 }
 
-intellij {
-	type.set("IU")
-	version.set("2024.2")
-	updateSinceUntilBuild.set(false)
+dependencies {
+	intellijPlatform {
+		@Suppress("DEPRECATION")
+		intellijIdeaUltimate("2024.2")
+		
+		bundledPlugin("com.intellij.java")
+		
+		if (System.getenv("IDEAVIM") == "1") {
+			plugin("IdeaVIM", "2.10.2")
+		}
+	}
 	
-	plugins.add("com.intellij.java")
-	
-	if (System.getenv("IDEAVIM") == "1") {
-		plugins.add("IdeaVIM:2.10.2")
+	testImplementation("org.junit.jupiter:junit-jupiter:5.11.0-M1")
+}
+
+intellijPlatform {
+	pluginConfiguration {
+		ideaVersion {
+			sinceBuild.set("242")
+			untilBuild.set(provider { null })
+		}
 	}
 }
 
 kotlin {
-	jvmToolchain(17)
-}
-
-dependencies {
-	testImplementation("org.junit.jupiter:junit-jupiter:5.11.0-M1")
-}
-
-tasks.patchPluginXml {
-	sinceBuild.set("242")
+	jvmToolchain(21)
+	
+	compilerOptions {
+		freeCompilerArgs = listOf(
+			"-X" + "jvm-default=all",
+			"-X" + "lambdas=indy"
+		)
+	}
 }
 
 tasks.test {
 	useJUnitPlatform()
-}
-
-tasks.withType<KotlinCompile> {
-	kotlinOptions.freeCompilerArgs = listOf(
-		"-Xjvm-default=all"
-	)
 }
