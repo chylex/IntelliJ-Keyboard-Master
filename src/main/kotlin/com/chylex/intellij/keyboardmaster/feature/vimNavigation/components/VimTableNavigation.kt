@@ -14,11 +14,7 @@ internal object VimTableNavigation {
 	
 	private val ROOT_NODE = VimCommonNavigation.commonRootNode<JTable>() + Parent(
 		mapOf(
-			KeyStroke.getKeyStroke('g') to Parent(
-				mapOf(
-					KeyStroke.getKeyStroke('g') to IdeaAction("Table-selectFirstRow"),
-				)
-			),
+			KeyStroke.getKeyStroke('g') to IdeaAction("Table-selectFirstRow"),
 			KeyStroke.getKeyStroke('G') to IdeaAction("Table-selectLastRow"),
 			KeyStroke.getKeyStroke('h') to IdeaAction("Table-selectPreviousColumn"),
 			KeyStroke.getKeyStroke('H') to IdeaAction("Table-selectPreviousColumnExtendSelection"),

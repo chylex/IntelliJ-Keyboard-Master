@@ -22,11 +22,7 @@ internal object VimListNavigation {
 	
 	private val ROOT_NODE = VimCommonNavigation.commonRootNode<JList<*>>() + Parent(
 		mapOf(
-			KeyStroke.getKeyStroke('g') to Parent(
-				mapOf(
-					KeyStroke.getKeyStroke('g') to IdeaAction("List-selectFirstRow"),
-				)
-			),
+			KeyStroke.getKeyStroke('g') to IdeaAction("List-selectFirstRow"),
 			KeyStroke.getKeyStroke('G') to IdeaAction("List-selectLastRow"),
 			KeyStroke.getKeyStroke('h') to IdeaAction("List-selectPreviousColumn"),
 			KeyStroke.getKeyStroke('H') to IdeaAction("List-selectPreviousColumnExtendSelection"),
