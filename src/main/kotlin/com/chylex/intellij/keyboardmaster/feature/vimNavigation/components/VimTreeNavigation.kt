@@ -27,21 +27,21 @@ internal object VimTreeNavigation {
 					KeyStroke.getKeyStroke('x') to CollapseAll,
 				)
 			),
+			KeyStroke.getKeyStroke('f') to SelectFirstSibling,
+			KeyStroke.getKeyStroke('F') to SelectLastSibling,
 			KeyStroke.getKeyStroke('g') to Parent(
 				mapOf(
 					KeyStroke.getKeyStroke('g') to IdeaAction("Tree-selectFirst"),
-					KeyStroke.getKeyStroke('j') to SelectLastSibling,
-					KeyStroke.getKeyStroke('k') to SelectFirstSibling,
+					KeyStroke.getKeyStroke('j') to IdeaAction("Tree-selectNextSibling"),
+					KeyStroke.getKeyStroke('k') to IdeaAction("Tree-selectPreviousSibling"),
 				)
 			),
 			KeyStroke.getKeyStroke('G') to IdeaAction("Tree-selectLast"),
 			KeyStroke.getKeyStroke('h') to CollapseSelfOrMoveToParentNode,
 			KeyStroke.getKeyStroke('H') to CollapseUntilRootNode,
 			KeyStroke.getKeyStroke('j') to IdeaAction("Tree-selectNext"),
-			KeyStroke.getKeyStroke('j', KeyEvent.ALT_DOWN_MASK) to IdeaAction("Tree-selectNextSibling"),
 			KeyStroke.getKeyStroke('J') to IdeaAction("Tree-selectNextExtendSelection"),
 			KeyStroke.getKeyStroke('k') to IdeaAction("Tree-selectPrevious"),
-			KeyStroke.getKeyStroke('k', KeyEvent.ALT_DOWN_MASK) to IdeaAction("Tree-selectPreviousSibling"),
 			KeyStroke.getKeyStroke('K') to IdeaAction("Tree-selectPreviousExtendSelection"),
 			KeyStroke.getKeyStroke('l') to ExpandSelfOrMoveToFirstChildNode,
 			KeyStroke.getKeyStroke('L') to ExpandUntilFirstLeafNode,
