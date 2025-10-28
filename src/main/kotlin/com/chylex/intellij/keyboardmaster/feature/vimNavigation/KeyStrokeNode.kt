@@ -24,12 +24,20 @@ internal interface KeyStrokeNode<T> {
 		
 		fun getChild(keyEvent: KeyEvent): KeyStrokeNode<T> {
 			val keyStroke = when {
-				keyEvent.keyChar != KeyEvent.CHAR_UNDEFINED -> KeyStroke.getKeyStroke(keyEvent.keyChar, keyEvent.modifiersEx and KeyEvent.SHIFT_DOWN_MASK.inv())
-				keyEvent.id == KeyEvent.KEY_PRESSED         -> KeyStroke.getKeyStroke(keyEvent.keyCode, keyEvent.modifiersEx, false)
-				else                                        -> return this
+				isCharEvent(keyEvent) -> KeyStroke.getKeyStroke(keyEvent.keyChar, keyEvent.modifiersEx and KeyEvent.SHIFT_DOWN_MASK.inv())
+				isCodeEvent(keyEvent) -> KeyStroke.getKeyStroke(keyEvent.keyCode, keyEvent.modifiersEx, false)
+				else                  -> return this
 			}
 			
 			return keys[keyStroke] ?: this
+		}
+		
+		private fun isCharEvent(keyEvent: KeyEvent): Boolean {
+			return keyEvent.keyChar != KeyEvent.CHAR_UNDEFINED && (keyEvent.modifiersEx and KeyEvent.CTRL_DOWN_MASK) == 0
+		}
+		
+		private fun isCodeEvent(keyEvent: KeyEvent): Boolean {
+			return keyEvent.id == KeyEvent.KEY_PRESSED
 		}
 		
 		operator fun plus(other: Parent<T>): Parent<T> {

@@ -1,8 +1,14 @@
 package com.chylex.intellij.keyboardmaster.feature.vimNavigation.components
 
+import com.chylex.intellij.keyboardmaster.feature.vimNavigation.KeyStrokeNode.ActionNode
 import com.chylex.intellij.keyboardmaster.feature.vimNavigation.KeyStrokeNode.IdeaAction
 import com.chylex.intellij.keyboardmaster.feature.vimNavigation.KeyStrokeNode.Parent
 import com.chylex.intellij.keyboardmaster.feature.vimNavigation.VimNavigationDispatcher
+import com.chylex.intellij.keyboardmaster.feature.vimNavigation.components.VimCommonNavigation.findScrollPane
+import com.chylex.intellij.keyboardmaster.feature.vimNavigation.components.VimCommonNavigation.scrollBy
+import com.chylex.intellij.keyboardmaster.feature.vimNavigation.components.VimCommonNavigation.scrollByPages
+import com.chylex.intellij.keyboardmaster.feature.vimNavigation.components.VimCommonNavigation.withShiftModifier
+import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.getUserData
 import com.intellij.openapi.ui.putUserData
@@ -32,6 +38,10 @@ internal object VimListNavigation {
 			KeyStroke.getKeyStroke('K') to IdeaAction("List-selectPreviousRowExtendSelection"),
 			KeyStroke.getKeyStroke('l') to IdeaAction("List-selectNextColumn"),
 			KeyStroke.getKeyStroke('L') to IdeaAction("List-selectNextColumnExtendSelection"),
+			*withShiftModifier(KeyEvent.VK_B, KeyEvent.CTRL_DOWN_MASK) { ScrollVerticallyAndSelect(pages = -1.0F, extendSelection = it) },
+			*withShiftModifier(KeyEvent.VK_D, KeyEvent.CTRL_DOWN_MASK) { ScrollVerticallyAndSelect(pages = +0.5F, extendSelection = it) },
+			*withShiftModifier(KeyEvent.VK_F, KeyEvent.CTRL_DOWN_MASK) { ScrollVerticallyAndSelect(pages = +1.0F, extendSelection = it) },
+			*withShiftModifier(KeyEvent.VK_U, KeyEvent.CTRL_DOWN_MASK) { ScrollVerticallyAndSelect(pages = -0.5F, extendSelection = it) },
 		)
 	)
 	
@@ -52,6 +62,35 @@ internal object VimListNavigation {
 	fun install(component: JList<*>, popup: WizardPopup) {
 		if (component.getUserData(KEY) == null) {
 			component.putUserData(KEY, VimPopupListNavigationDispatcher(component, popup))
+		}
+	}
+	
+	private data class ScrollVerticallyAndSelect(private val pages: Float, private val extendSelection: Boolean) : ActionNode<VimNavigationDispatcher<JList<*>>> {
+		override fun performAction(holder: VimNavigationDispatcher<JList<*>>, actionEvent: AnActionEvent, keyEvent: KeyEvent) {
+			val list = holder.component
+			val scrollPane = list.findScrollPane() ?: return
+			
+			scrollPane.scrollByPages(pages)
+			
+			if (pages < 0F) {
+				val topItemBounds = list.firstVisibleIndex.let { list.getCellBounds(it, it) } ?: return
+				scrollPane.scrollBy(topItemBounds.height - 1)
+			}
+			
+			val topItemIndex = list.firstVisibleIndex
+			if (topItemIndex == -1) {
+				return
+			}
+			
+			if (extendSelection) {
+				val anchor = list.anchorSelectionIndex.takeIf { it in 0 until list.model.size } ?: 0
+				list.setSelectionInterval(anchor, topItemIndex)
+			}
+			else {
+				list.selectedIndex = topItemIndex
+			}
+			
+			list.ensureIndexIsVisible(topItemIndex)
 		}
 	}
 	

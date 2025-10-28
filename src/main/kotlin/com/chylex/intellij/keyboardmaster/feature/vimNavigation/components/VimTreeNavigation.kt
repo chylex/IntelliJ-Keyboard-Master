@@ -4,6 +4,10 @@ import com.chylex.intellij.keyboardmaster.feature.vimNavigation.KeyStrokeNode.Ac
 import com.chylex.intellij.keyboardmaster.feature.vimNavigation.KeyStrokeNode.IdeaAction
 import com.chylex.intellij.keyboardmaster.feature.vimNavigation.KeyStrokeNode.Parent
 import com.chylex.intellij.keyboardmaster.feature.vimNavigation.VimNavigationDispatcher
+import com.chylex.intellij.keyboardmaster.feature.vimNavigation.components.VimCommonNavigation.findScrollPane
+import com.chylex.intellij.keyboardmaster.feature.vimNavigation.components.VimCommonNavigation.scrollBy
+import com.chylex.intellij.keyboardmaster.feature.vimNavigation.components.VimCommonNavigation.scrollByPages
+import com.chylex.intellij.keyboardmaster.feature.vimNavigation.components.VimCommonNavigation.withShiftModifier
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.ui.getUserData
 import com.intellij.openapi.ui.putUserData
@@ -51,12 +55,55 @@ internal object VimTreeNavigation {
 			KeyStroke.getKeyStroke('S') to SelectLastSibling,
 			KeyStroke.getKeyStroke('x') to CollapseChildrenToPreviousLevel,
 			KeyStroke.getKeyStroke('X') to CollapseSelf,
+			*withShiftModifier(KeyEvent.VK_B, KeyEvent.CTRL_DOWN_MASK) { ScrollVerticallyAndSelect(pages = -1.0F, extendSelection = it) },
+			*withShiftModifier(KeyEvent.VK_D, KeyEvent.CTRL_DOWN_MASK) { ScrollVerticallyAndSelect(pages = +0.5F, extendSelection = it) },
+			*withShiftModifier(KeyEvent.VK_F, KeyEvent.CTRL_DOWN_MASK) { ScrollVerticallyAndSelect(pages = +1.0F, extendSelection = it) },
+			*withShiftModifier(KeyEvent.VK_U, KeyEvent.CTRL_DOWN_MASK) { ScrollVerticallyAndSelect(pages = -0.5F, extendSelection = it) },
 		)
 	)
 	
 	fun install(component: JTree) {
 		if (component.getUserData(KEY) == null) {
 			component.putUserData(KEY, VimNavigationDispatcher(component, ROOT_NODE))
+		}
+	}
+	
+	private data class ScrollVerticallyAndSelect(private val pages: Float, private val extendSelection: Boolean) : ActionNode<VimNavigationDispatcher<JTree>> {
+		override fun performAction(holder: VimNavigationDispatcher<JTree>, actionEvent: AnActionEvent, keyEvent: KeyEvent) {
+			val tree = holder.component
+			val scrollPane = tree.findScrollPane() ?: return
+			
+			scrollPane.scrollByPages(pages)
+			
+			if (pages < 0F) {
+				val topPath = pathOnTop(tree) ?: return
+				val topPathBounds = tree.getPathBounds(topPath) ?: return
+				scrollPane.scrollBy(topPathBounds.height - 1)
+			}
+			
+			val pathToSelect = pathOnTop(tree) ?: return
+			
+			if (extendSelection) {
+				val anchor = tree.anchorSelectionPath
+				val anchorRow = if (anchor == null) -1 else tree.getRowForPath(anchor)
+				if (anchorRow < 0) {
+					tree.selectionPath = pathToSelect
+				}
+				else {
+					tree.setSelectionInterval(tree.getRowForPath(pathToSelect), anchorRow)
+					tree.setAnchorSelectionPath(anchor)
+					tree.leadSelectionPath = pathToSelect
+				}
+			}
+			else {
+				tree.selectionPath = pathToSelect
+			}
+			
+			tree.scrollRectToVisible(tree.getPathBounds(pathToSelect))
+		}
+		
+		private fun pathOnTop(tree: JTree): TreePath? {
+			return tree.visibleRect.let { tree.getClosestPathForLocation(it.x, it.y) }
 		}
 	}
 	
@@ -289,7 +336,7 @@ internal object VimTreeNavigation {
 	
 	private fun collapseAndScroll(tree: JTree, path: TreePath) {
 		tree.collapsePath(path)
-		tree.scrollRowToVisible(tree.getRowForPath(path))
+		tree.scrollPathToVisible(path)
 	}
 	
 	private inline fun withParentPath(tree: JTree, path: TreePath, action: (TreePath) -> Unit) {
