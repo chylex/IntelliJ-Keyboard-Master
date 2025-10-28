@@ -27,8 +27,6 @@ internal object VimTreeNavigation {
 					KeyStroke.getKeyStroke('x') to CollapseAll,
 				)
 			),
-			KeyStroke.getKeyStroke('f') to SelectFirstSibling,
-			KeyStroke.getKeyStroke('F') to SelectLastSibling,
 			KeyStroke.getKeyStroke('g') to Parent(
 				mapOf(
 					KeyStroke.getKeyStroke('g') to IdeaAction("Tree-selectFirst"),
@@ -49,6 +47,8 @@ internal object VimTreeNavigation {
 			KeyStroke.getKeyStroke('O') to IdeaAction("FullyExpandTreeNode"),
 			KeyStroke.getKeyStroke('p') to IdeaAction("Tree-selectParentNoCollapse"),
 			KeyStroke.getKeyStroke('P') to IdeaAction("Tree-selectFirst"),
+			KeyStroke.getKeyStroke('s') to SelectFirstSibling,
+			KeyStroke.getKeyStroke('S') to SelectLastSibling,
 			KeyStroke.getKeyStroke('x') to CollapseChildrenToPreviousLevel,
 			KeyStroke.getKeyStroke('X') to CollapseSelf,
 		)
