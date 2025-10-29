@@ -135,6 +135,10 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 	}
 	
 	final override fun update(e: AnActionEvent) {
+		if (!isSearching.get() && SpeedSearchSupply.getSupply(component)?.isPopupActive == true) {
+			isSearching.set(true)
+		}
+		
 		e.presentation.isEnabled = !ignoreEventDueToActiveSearch(e) && !ignoreEventDueToActiveEditing(e)
 	}
 	
@@ -148,7 +152,7 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 	}
 	
 	final override fun getActionUpdateThread(): ActionUpdateThread {
-		return ActionUpdateThread.BGT
+		return ActionUpdateThread.EDT
 	}
 	
 	private sealed interface WrappedAction {
