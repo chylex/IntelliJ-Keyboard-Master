@@ -7,6 +7,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.KeyboardShortcut
+import com.intellij.openapi.actionSystem.PlatformCoreDataKeys
 import com.intellij.openapi.actionSystem.ex.ActionUtil
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.DumbAwareAction
@@ -25,6 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.Action
 import javax.swing.JComponent
 import javax.swing.KeyStroke
+import javax.swing.text.JTextComponent
 
 internal open class VimNavigationDispatcher<T : JComponent>(final override val component: T, private val rootNode: KeyStrokeNode.Parent<VimNavigationDispatcher<T>>, disposable: Disposable? = null) : DumbAwareAction(), ComponentHolder {
 	companion object {
@@ -148,7 +150,8 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 	
 	private fun ignoreEventDueToActiveEditing(e: AnActionEvent): Boolean {
 		// Avoid stealing keys from inline text fields.
-		return e.dataContext.getData(CommonDataKeys.EDITOR) != null
+		return e.getData(CommonDataKeys.EDITOR) != null
+			|| e.getData(PlatformCoreDataKeys.CONTEXT_COMPONENT) is JTextComponent
 	}
 	
 	final override fun getActionUpdateThread(): ActionUpdateThread {
