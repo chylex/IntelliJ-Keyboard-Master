@@ -21,6 +21,8 @@ dependencies {
 		@Suppress("DEPRECATION")
 		intellijIdeaUltimate("2024.2")
 		
+		bundledModule("intellij.platform.vcs.log.impl")
+		
 		bundledPlugin("com.intellij.java")
 		
 		if (System.getenv("IDEAVIM") == "1") {

@@ -96,32 +96,55 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 	
 	final override fun actionPerformed(e: AnActionEvent) {
 		val keyEvent = e.inputEvent as? KeyEvent ?: return
-		
 		if (keyEvent.id == KeyEvent.KEY_PRESSED && keyEvent.keyCode == KeyEvent.VK_ENTER) {
-			handleEnterKeyPress(e, keyEvent)
-			return
+			handleEnterKeyPress(e, keyEvent) { originalEnterAction.perform(e, it) }
 		}
-		
+		else {
+			handleKeyPress(e, keyEvent) {}
+		}
+	}
+	
+	protected inline fun handleKeyPress(actionEvent: AnActionEvent, keyEvent: KeyEvent, fallback: () -> Unit) {
 		when (val nextNode = currentNode.getChild(keyEvent)) {
 			is KeyStrokeNode.Parent<VimNavigationDispatcher<T>>     -> currentNode = nextNode
 			is KeyStrokeNode.ActionNode<VimNavigationDispatcher<T>> -> {
-				nextNode.performAction(this, e, keyEvent)
+				nextNode.performAction(this, actionEvent, keyEvent)
 				currentNode = rootNode
+			}
+			else                                                    -> {
+				currentNode = rootNode
+				fallback()
 			}
 		}
 	}
 	
-	private fun handleEnterKeyPress(actionEvent: AnActionEvent, keyEvent: KeyEvent) {
-		handleEnterKeyPress(keyEvent) { originalEnterAction.perform(actionEvent, it) }
+	protected inline fun handleEnterKeyPress(actionEvent: AnActionEvent, keyEvent: KeyEvent, originalAction: (KeyEvent) -> Unit) {
+		if (stopSpeedSearchOnEnterKeyPress(keyEvent)) {
+			return
+		}
+		
+		handleKeyPress(actionEvent, keyEvent) {
+			currentNode = rootNode
+			originalAction(keyEvent)
+		}
 	}
 	
 	protected inline fun handleEnterKeyPress(keyEvent: KeyEvent, originalAction: (KeyEvent) -> Unit) {
+		if (stopSpeedSearchOnEnterKeyPress(keyEvent)) {
+			return
+		}
+		
+		currentNode = rootNode
+		originalAction(keyEvent)
+	}
+	
+	private fun stopSpeedSearchOnEnterKeyPress(keyEvent: KeyEvent): Boolean {
 		if (isSearching.compareAndSet(true, false) && !runEnterActionImmediately(keyEvent)) {
 			stopSpeedSearch()
+			return true
 		}
 		else {
-			currentNode = rootNode
-			originalAction(keyEvent)
+			return false
 		}
 	}
 	
