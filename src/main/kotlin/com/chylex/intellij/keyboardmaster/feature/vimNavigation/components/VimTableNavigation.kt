@@ -20,7 +20,7 @@ import javax.swing.KeyStroke
 internal object VimTableNavigation {
 	private val KEY = Key.create<VimNavigationDispatcher<JTable>>("KeyboardMaster-VimTableNavigation")
 	
-	private val ROOT_NODE = VimCommonNavigation.commonRootNode<JTable>() + Parent(
+	private val BASIC_ROOT_NODE = VimCommonNavigation.commonRootNode<JTable>() + Parent(
 		mapOf(
 			KeyStroke.getKeyStroke('g') to IdeaAction("Table-selectFirstRow"),
 			KeyStroke.getKeyStroke('G') to IdeaAction("Table-selectLastRow"),
@@ -41,7 +41,7 @@ internal object VimTableNavigation {
 	
 	fun install(component: JTable) {
 		if (component.getUserData(KEY) == null) {
-			component.putUserData(KEY, VimNavigationDispatcher(component, ROOT_NODE))
+			component.putUserData(KEY, VimNavigationDispatcher(component, BASIC_ROOT_NODE))
 		}
 	}
 	

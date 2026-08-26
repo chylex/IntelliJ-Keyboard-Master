@@ -8,6 +8,7 @@ import com.chylex.intellij.keyboardmaster.feature.vimNavigation.components.VimCo
 import com.chylex.intellij.keyboardmaster.feature.vimNavigation.components.VimCommonNavigation.scrollBy
 import com.chylex.intellij.keyboardmaster.feature.vimNavigation.components.VimCommonNavigation.scrollByPages
 import com.chylex.intellij.keyboardmaster.feature.vimNavigation.components.VimCommonNavigation.withShiftModifier
+import com.intellij.ide.projectView.impl.ProjectViewTree
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.ui.getUserData
 import com.intellij.openapi.ui.putUserData
@@ -15,6 +16,7 @@ import com.intellij.openapi.util.Key
 import com.intellij.ui.ClientProperty
 import com.intellij.ui.tree.ui.DefaultTreeUI
 import java.awt.event.KeyEvent
+import javax.swing.JComponent
 import javax.swing.JTree
 import javax.swing.KeyStroke
 import javax.swing.tree.TreeModel
@@ -23,7 +25,7 @@ import javax.swing.tree.TreePath
 internal object VimTreeNavigation {
 	private val KEY = Key.create<VimNavigationDispatcher<JTree>>("KeyboardMaster-VimTreeNavigation")
 	
-	private val ROOT_NODE = VimCommonNavigation.commonRootNode<JTree>() + Parent(
+	private val BASIC_ROOT_NODE = VimCommonNavigation.commonRootNode<JTree>() + Parent(
 		mapOf(
 			KeyStroke.getKeyStroke('a') to Parent(
 				mapOf(
@@ -62,10 +64,23 @@ internal object VimTreeNavigation {
 		)
 	)
 	
+	private val PROJECT_FILE_TREE_ROOT_NODE = BASIC_ROOT_NODE + Parent(
+		mapOf(
+			KeyStroke.getKeyStroke('I') to ToggleExcludedFilesInProjectView(),
+			KeyStroke.getKeyStroke('r') to IdeaAction("SynchronizeCurrentFile"),
+			KeyStroke.getKeyStroke('R') to IdeaAction("Synchronize"),
+		)
+	)
+	
 	fun install(component: JTree) {
 		if (component.getUserData(KEY) == null) {
-			component.putUserData(KEY, VimNavigationDispatcher(component, ROOT_NODE))
+			component.putUserData(KEY, VimNavigationDispatcher(component, pickRootNode(component)))
 		}
+	}
+	
+	private fun pickRootNode(component: JTree) = when (component) {
+		is ProjectViewTree -> PROJECT_FILE_TREE_ROOT_NODE
+		else               -> BASIC_ROOT_NODE
 	}
 	
 	private data class ScrollVerticallyAndSelect(private val pages: Float, private val extendSelection: Boolean) : ActionNode<VimNavigationDispatcher<JTree>> {
@@ -356,5 +371,13 @@ internal object VimTreeNavigation {
 	
 	private fun isLeaf(tree: JTree, firstChildPath: TreePath): Boolean {
 		return tree.model.isLeaf(firstChildPath.lastPathComponent)
+	}
+	
+	private class ToggleExcludedFilesInProjectView<T : JComponent> : ActionNode<VimNavigationDispatcher<T>> {
+		private val showExcludedFilesAction = IdeaAction<VimNavigationDispatcher<T>>("ProjectView.ShowExcludedFiles")
+		
+		override fun performAction(holder: VimNavigationDispatcher<T>, actionEvent: AnActionEvent, keyEvent: KeyEvent) {
+			showExcludedFilesAction.performAction(holder, actionEvent, keyEvent)
+		}
 	}
 }

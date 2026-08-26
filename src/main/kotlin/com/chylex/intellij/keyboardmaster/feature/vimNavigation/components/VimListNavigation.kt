@@ -26,7 +26,7 @@ import javax.swing.KeyStroke
 internal object VimListNavigation {
 	private val KEY = Key.create<VimNavigationDispatcher<JList<*>>>("KeyboardMaster-VimListNavigation")
 	
-	private val ROOT_NODE = VimCommonNavigation.commonRootNode<JList<*>>() + Parent(
+	private val BASIC_ROOT_NODE = VimCommonNavigation.commonRootNode<JList<*>>() + Parent(
 		mapOf(
 			KeyStroke.getKeyStroke('g') to IdeaAction("List-selectFirstRow"),
 			KeyStroke.getKeyStroke('G') to IdeaAction("List-selectLastRow"),
@@ -45,7 +45,7 @@ internal object VimListNavigation {
 		)
 	)
 	
-	private val POPUP_LIST_ROOT_NODE = ROOT_NODE + Parent(
+	private val POPUP_LIST_ROOT_NODE = BASIC_ROOT_NODE + Parent(
 		mapOf(
 			KeyStroke.getKeyStroke('o') to IdeaAction("List-selectNextColumn"),
 			KeyStroke.getKeyStroke('p') to IdeaAction("List-selectPreviousColumn"),
@@ -55,7 +55,7 @@ internal object VimListNavigation {
 	
 	fun install(component: JList<*>) {
 		if (component.getUserData(KEY) == null && component.javaClass.enclosingClass.let { it == null || !WizardPopup::class.java.isAssignableFrom(it) }) {
-			component.putUserData(KEY, VimNavigationDispatcher(component, ROOT_NODE))
+			component.putUserData(KEY, VimNavigationDispatcher(component, BASIC_ROOT_NODE))
 		}
 	}
 	

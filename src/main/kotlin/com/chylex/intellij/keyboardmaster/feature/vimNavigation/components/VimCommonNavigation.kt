@@ -7,7 +7,6 @@ import com.chylex.intellij.keyboardmaster.feature.vimNavigation.KeyStrokeNode.Pa
 import com.chylex.intellij.keyboardmaster.feature.vimNavigation.VimNavigationDispatcher
 import com.chylex.intellij.keyboardmaster.feature.vimNavigation.VimNavigationDispatcher.Companion.getParentToolWindowId
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.wm.ToolWindowId
 import com.intellij.openapi.wm.ex.ToolWindowManagerEx
 import com.intellij.ui.ComponentUtil
 import com.intellij.ui.speedSearch.SpeedSearchActivator
@@ -24,10 +23,7 @@ internal object VimCommonNavigation {
 		mapOf(
 			KeyStroke.getKeyStroke('A') to IdeaAction("MaximizeToolWindow"),
 			KeyStroke.getKeyStroke('f') to StartSearch(),
-			KeyStroke.getKeyStroke('I') to ToggleExcludedFilesInProjectView(),
 			KeyStroke.getKeyStroke('m') to IdeaAction("ShowPopupMenu"),
-			KeyStroke.getKeyStroke('r') to IdeaAction("SynchronizeCurrentFile"),
-			KeyStroke.getKeyStroke('R') to IdeaAction("Synchronize"),
 			KeyStroke.getKeyStroke('q') to CloseParentPopupOrToolWindow(),
 			KeyStroke.getKeyStroke('/') to StartSearch(),
 		)
@@ -62,16 +58,6 @@ internal object VimCommonNavigation {
 			val project = actionEvent.project ?: return
 			val toolWindowId = holder.component.getParentToolWindowId() ?: return
 			ToolWindowManagerEx.getInstanceEx(project).hideToolWindow(toolWindowId, hideSide = false)
-		}
-	}
-	
-	private class ToggleExcludedFilesInProjectView<T : JComponent> : ActionNode<VimNavigationDispatcher<T>> {
-		private val showExcludedFilesAction = IdeaAction<VimNavigationDispatcher<T>>("ProjectView.ShowExcludedFiles")
-		
-		override fun performAction(holder: VimNavigationDispatcher<T>, actionEvent: AnActionEvent, keyEvent: KeyEvent) {
-			if (holder.component.getParentToolWindowId() == ToolWindowId.PROJECT_VIEW) {
-				showExcludedFilesAction.performAction(holder, actionEvent, keyEvent)
-			}
 		}
 	}
 	
