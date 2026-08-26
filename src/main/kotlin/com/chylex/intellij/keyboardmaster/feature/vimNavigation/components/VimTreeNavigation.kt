@@ -13,6 +13,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.ui.getUserData
 import com.intellij.openapi.ui.putUserData
 import com.intellij.openapi.util.Key
+import com.intellij.openapi.vcs.changes.ui.ChangesTree
 import com.intellij.ui.ClientProperty
 import com.intellij.ui.tree.ui.DefaultTreeUI
 import java.awt.event.KeyEvent
@@ -72,6 +73,13 @@ internal object VimTreeNavigation {
 		)
 	)
 	
+	private val GIT_CHANGES_ROOT_NODE = BASIC_ROOT_NODE + Parent(
+		mapOf(
+			KeyStroke.getKeyStroke('e') to IdeaAction("EditSource"),
+			KeyStroke.getKeyStroke('r') to IdeaAction("ChangesView.Revert"),
+		)
+	)
+	
 	fun install(component: JTree) {
 		if (component.getUserData(KEY) == null) {
 			component.putUserData(KEY, VimNavigationDispatcher(component, pickRootNode(component)))
@@ -80,6 +88,7 @@ internal object VimTreeNavigation {
 	
 	private fun pickRootNode(component: JTree) = when (component) {
 		is ProjectViewTree -> PROJECT_FILE_TREE_ROOT_NODE
+		is ChangesTree     -> GIT_CHANGES_ROOT_NODE
 		else               -> BASIC_ROOT_NODE
 	}
 	

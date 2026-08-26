@@ -12,6 +12,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.ui.getUserData
 import com.intellij.openapi.ui.putUserData
 import com.intellij.openapi.util.Key
+import com.intellij.vcs.log.ui.table.VcsLogGraphTable
 import java.awt.Rectangle
 import java.awt.event.KeyEvent
 import javax.swing.JTable
@@ -39,10 +40,27 @@ internal object VimTableNavigation {
 		)
 	)
 	
+	private val GIT_LOG_TABLE_ROOT_NODE = BASIC_ROOT_NODE + Parent(
+		mapOf(
+			KeyStroke.getKeyStroke('d') to IdeaAction("Git.Drop.Commits"),
+			KeyStroke.getKeyStroke('n') to IdeaAction("Git.Reword.Commit"),
+			KeyStroke.getKeyStroke('p') to IdeaAction("Vcs.CherryPick"),
+			KeyStroke.getKeyStroke('r') to IdeaAction("Git.Interactive.Rebase"),
+			KeyStroke.getKeyStroke('s') to IdeaAction("Git.Squash.Commits"),
+			KeyStroke.getKeyStroke('u') to IdeaAction("Git.Uncommit"),
+			KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0) to IdeaAction("Git.CheckoutRevision"),
+		)
+	)
+	
 	fun install(component: JTable) {
 		if (component.getUserData(KEY) == null) {
-			component.putUserData(KEY, VimNavigationDispatcher(component, BASIC_ROOT_NODE))
+			component.putUserData(KEY, VimNavigationDispatcher(component, pickRootNode(component)))
 		}
+	}
+	
+	private fun pickRootNode(component: JTable) = when (component) {
+		is VcsLogGraphTable -> GIT_LOG_TABLE_ROOT_NODE
+		else                -> BASIC_ROOT_NODE
 	}
 	
 	private data class ScrollVerticallyAndSelect(private val pages: Float, private val extendSelection: Boolean) : ActionNode<VimNavigationDispatcher<JTable>> {
