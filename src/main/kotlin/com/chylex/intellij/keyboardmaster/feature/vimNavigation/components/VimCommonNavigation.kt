@@ -61,7 +61,7 @@ internal object VimCommonNavigation {
 			
 			val project = actionEvent.project ?: return
 			val toolWindowId = holder.component.getParentToolWindowId() ?: return
-			ToolWindowManagerEx.getInstanceEx(project).hideToolWindow(toolWindowId, true)
+			ToolWindowManagerEx.getInstanceEx(project).hideToolWindow(toolWindowId, hideSide = false)
 		}
 	}
 	
