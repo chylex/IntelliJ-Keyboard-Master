@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.chylex.intellij.keyboardmaster"
-version = "0.6.7"
+version = "0.6.8"
 
 repositories {
 	mavenCentral()
