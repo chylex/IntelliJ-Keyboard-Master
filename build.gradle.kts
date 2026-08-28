@@ -26,6 +26,8 @@ dependencies {
 		
 		bundledPlugin("com.intellij.java")
 		
+		compatiblePlugin("com.intellij.classic.ui")
+		
 		if (System.getenv("IDEAVIM") == "1") {
 			plugin("IdeaVIM", "2.10.2")
 		}
