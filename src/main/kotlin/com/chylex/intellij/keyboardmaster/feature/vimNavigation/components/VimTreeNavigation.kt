@@ -13,6 +13,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.ui.getUserData
 import com.intellij.openapi.ui.putUserData
 import com.intellij.openapi.util.Key
+import com.intellij.openapi.vcs.changes.ui.ChangesListView
 import com.intellij.openapi.vcs.changes.ui.ChangesTree
 import com.intellij.ui.ClientProperty
 import com.intellij.ui.tree.ui.DefaultTreeUI
@@ -73,10 +74,23 @@ internal object VimTreeNavigation {
 		)
 	)
 	
-	private val GIT_CHANGES_ROOT_NODE = BASIC_ROOT_NODE + Parent(
+	private val GIT_CHANGES_BASIC_ROOT_NODE = BASIC_ROOT_NODE + Parent(
 		mapOf(
+			KeyStroke.getKeyStroke('d') to IdeaAction("Vcs.ShowDiffWithLocal"),
 			KeyStroke.getKeyStroke('e') to IdeaAction("EditSource"),
+		)
+	)
+	
+	private val GIT_LOCAL_CHANGES_ROOT_NODE = GIT_CHANGES_BASIC_ROOT_NODE + Parent(
+		mapOf(
 			KeyStroke.getKeyStroke('r') to IdeaAction("ChangesView.Revert"),
+		)
+	)
+	
+	private val GIT_OTHER_CHANGES_ROOT_NODE = GIT_CHANGES_BASIC_ROOT_NODE + Parent(
+		mapOf(
+			KeyStroke.getKeyStroke('c') to IdeaAction("Vcs.ApplySelectedChanges"),
+			KeyStroke.getKeyStroke('r') to IdeaAction("Vcs.RevertSelectedChanges"),
 		)
 	)
 	
@@ -88,7 +102,8 @@ internal object VimTreeNavigation {
 	
 	private fun pickRootNode(component: JTree) = when (component) {
 		is ProjectViewTree -> PROJECT_FILE_TREE_ROOT_NODE
-		is ChangesTree     -> GIT_CHANGES_ROOT_NODE
+		is ChangesListView -> GIT_LOCAL_CHANGES_ROOT_NODE
+		is ChangesTree     -> GIT_OTHER_CHANGES_ROOT_NODE
 		else               -> BASIC_ROOT_NODE
 	}
 	
