@@ -97,6 +97,7 @@ internal object VimTreeNavigation {
 	fun install(component: JTree) {
 		if (component.getUserData(KEY) == null) {
 			component.putUserData(KEY, VimNavigationDispatcher(component, pickRootNode(component)))
+			ClientProperty.put(component, DefaultTreeUI.AUTO_EXPAND_ALLOWED, false)
 		}
 	}
 	
@@ -254,7 +255,7 @@ internal object VimTreeNavigation {
 			
 			do {
 				if (pathsToExpand.any(tree::isCollapsed)) {
-					runWithoutAutoExpand(tree) { pathsToExpand.forEach(tree::expandPath) }
+					pathsToExpand.forEach(tree::expandPath)
 					
 					for (path in pathsToExpand) {
 						forEachChild(model, path) { tree.collapsePath(path.pathByAddingChild(it)) }
@@ -287,7 +288,7 @@ internal object VimTreeNavigation {
 				selectRow(tree, getFirstChild(tree, path))
 			}
 			else {
-				runWithoutAutoExpand(tree) { tree.expandPath(path) }
+				tree.expandPath(path)
 			}
 		}
 	}
@@ -351,16 +352,6 @@ internal object VimTreeNavigation {
 		
 		for (i in 0 until model.getChildCount(lastPathComponent)) {
 			action(model.getChild(lastPathComponent, i))
-		}
-	}
-	
-	private inline fun runWithoutAutoExpand(tree: JTree, action: () -> Unit) {
-		val previousAutoExpandValue = ClientProperty.get(tree, DefaultTreeUI.AUTO_EXPAND_ALLOWED)
-		ClientProperty.put(tree, DefaultTreeUI.AUTO_EXPAND_ALLOWED, false)
-		try {
-			action()
-		} finally {
-			ClientProperty.put(tree, DefaultTreeUI.AUTO_EXPAND_ALLOWED, previousAutoExpandValue)
 		}
 	}
 	
