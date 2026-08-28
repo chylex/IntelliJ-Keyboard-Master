@@ -22,14 +22,14 @@ internal interface KeyStrokeNode<T> {
 			}
 		}
 		
-		fun getChild(keyEvent: KeyEvent): KeyStrokeNode<T> {
+		fun getChild(keyEvent: KeyEvent): KeyStrokeNode<T>? {
 			val keyStroke = when {
 				isCharEvent(keyEvent) -> KeyStroke.getKeyStroke(keyEvent.keyChar, keyEvent.modifiersEx and KeyEvent.SHIFT_DOWN_MASK.inv())
 				isCodeEvent(keyEvent) -> KeyStroke.getKeyStroke(keyEvent.keyCode, keyEvent.modifiersEx, false)
-				else                  -> return this
+				else                  -> return null
 			}
 			
-			return keys[keyStroke] ?: this
+			return keys[keyStroke]
 		}
 		
 		private fun isCharEvent(keyEvent: KeyEvent): Boolean {

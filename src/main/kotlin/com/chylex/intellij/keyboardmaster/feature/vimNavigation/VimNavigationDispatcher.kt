@@ -106,13 +106,14 @@ internal open class VimNavigationDispatcher<T : JComponent>(final override val c
 	
 	protected inline fun handleKeyPress(actionEvent: AnActionEvent, keyEvent: KeyEvent, fallback: () -> Unit) {
 		when (val nextNode = currentNode.getChild(keyEvent)) {
-			is KeyStrokeNode.Parent<VimNavigationDispatcher<T>>     -> currentNode = nextNode
+			is KeyStrokeNode.Parent<VimNavigationDispatcher<T>>     -> {
+				currentNode = nextNode
+			}
 			is KeyStrokeNode.ActionNode<VimNavigationDispatcher<T>> -> {
 				nextNode.performAction(this, actionEvent, keyEvent)
 				currentNode = rootNode
 			}
 			else                                                    -> {
-				currentNode = rootNode
 				fallback()
 			}
 		}
