@@ -33,7 +33,7 @@ internal interface KeyStrokeNode<T> {
 		}
 		
 		private fun isCharEvent(keyEvent: KeyEvent): Boolean {
-			return keyEvent.keyChar != KeyEvent.CHAR_UNDEFINED && keyEvent.keyCode != KeyEvent.VK_ENTER && (keyEvent.modifiersEx and KeyEvent.CTRL_DOWN_MASK) == 0
+			return keyEvent.keyChar != KeyEvent.CHAR_UNDEFINED && keyEvent.keyCode != KeyEvent.VK_ENTER && (keyEvent.modifiersEx and (KeyEvent.CTRL_DOWN_MASK or KeyEvent.ALT_DOWN_MASK)) == 0
 		}
 		
 		private fun isCodeEvent(keyEvent: KeyEvent): Boolean {
