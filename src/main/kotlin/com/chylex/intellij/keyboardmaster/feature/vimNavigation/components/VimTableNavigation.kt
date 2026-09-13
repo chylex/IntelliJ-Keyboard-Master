@@ -34,6 +34,9 @@ internal object VimTableNavigation {
 			KeyStroke.getKeyStroke('K') to IdeaAction("Table-selectPreviousRowExtendSelection"),
 			KeyStroke.getKeyStroke('l') to IdeaAction("Table-selectNextColumn"),
 			KeyStroke.getKeyStroke('L') to IdeaAction("Table-selectNextColumnExtendSelection"),
+			KeyStroke.getKeyStroke(' ') to StartEditingSelectedCell,
+			KeyStroke.getKeyStroke(KeyEvent.VK_J, KeyEvent.ALT_DOWN_MASK) to DispatchKeyEvent(KeyEvent.VK_DOWN, KeyEvent.CHAR_UNDEFINED, KeyEvent.ALT_DOWN_MASK),
+			KeyStroke.getKeyStroke(KeyEvent.VK_K, KeyEvent.ALT_DOWN_MASK) to DispatchKeyEvent(KeyEvent.VK_UP, KeyEvent.CHAR_UNDEFINED, KeyEvent.ALT_DOWN_MASK),
 			*withShiftModifier(KeyEvent.VK_B, KeyEvent.CTRL_DOWN_MASK) { ScrollVerticallyAndSelect(pages = -1.0F, extendSelection = it) },
 			*withShiftModifier(KeyEvent.VK_D, KeyEvent.CTRL_DOWN_MASK) { ScrollVerticallyAndSelect(pages = +0.5F, extendSelection = it) },
 			*withShiftModifier(KeyEvent.VK_F, KeyEvent.CTRL_DOWN_MASK) { ScrollVerticallyAndSelect(pages = +1.0F, extendSelection = it) },
@@ -52,10 +55,9 @@ internal object VimTableNavigation {
 			KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0) to IdeaAction("Git.CheckoutRevision"),
 		)
 	)
+	
 	private val GIT_REBASE_TABLE_ROOT_NODE = BASIC_ROOT_NODE + Parent(
 		mapOf(
-			KeyStroke.getKeyStroke(KeyEvent.VK_J, KeyEvent.ALT_DOWN_MASK) to DispatchKeyEvent(KeyEvent.VK_DOWN, KeyEvent.CHAR_UNDEFINED, KeyEvent.ALT_DOWN_MASK),
-			KeyStroke.getKeyStroke(KeyEvent.VK_K, KeyEvent.ALT_DOWN_MASK) to DispatchKeyEvent(KeyEvent.VK_UP, KeyEvent.CHAR_UNDEFINED, KeyEvent.ALT_DOWN_MASK),
 			KeyStroke.getKeyStroke('d') to DispatchKeyEvent(KeyEvent.VK_D, 'd', KeyEvent.ALT_DOWN_MASK),
 			KeyStroke.getKeyStroke('e') to DispatchKeyEvent(KeyEvent.VK_E, 'e', KeyEvent.ALT_DOWN_MASK),
 			KeyStroke.getKeyStroke('f') to DispatchKeyEvent(KeyEvent.VK_F, 'f', KeyEvent.ALT_DOWN_MASK),
@@ -68,6 +70,7 @@ internal object VimTableNavigation {
 	fun install(component: JTable) {
 		if (component.getUserData(KEY) == null) {
 			component.putUserData(KEY, VimNavigationDispatcher(component, pickRootNode(component)))
+			component.putClientProperty("JTable.autoStartsEdit", false)
 		}
 	}
 	
@@ -101,6 +104,19 @@ internal object VimTableNavigation {
 			
 			table.changeSelection(rowIndexToSelect, table.selectedColumn, false, extendSelection)
 			table.scrollRectToVisible(adjustedRect)
+		}
+	}
+	
+	private object StartEditingSelectedCell : ActionNode<VimNavigationDispatcher<JTable>> {
+		override fun performAction(holder: VimNavigationDispatcher<JTable>, actionEvent: AnActionEvent, keyEvent: KeyEvent) {
+			val table = holder.component
+			if (table.isEditing) {
+				return
+			}
+			
+			val rowIndex = table.selectionModel.leadSelectionIndex
+			val columnIndex = table.columnModel.selectionModel.leadSelectionIndex
+			table.editCellAt(rowIndex, columnIndex)
 		}
 	}
 	
