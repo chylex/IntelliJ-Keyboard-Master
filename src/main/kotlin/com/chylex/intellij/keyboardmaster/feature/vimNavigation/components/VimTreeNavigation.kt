@@ -53,10 +53,10 @@ internal object VimTreeNavigation {
 			KeyStroke.getKeyStroke('L') to ExpandUntilFirstLeafNode,
 			KeyStroke.getKeyStroke('o') to ExpandChildrenToNextLevel,
 			KeyStroke.getKeyStroke('O') to IdeaAction("FullyExpandTreeNode"),
-			KeyStroke.getKeyStroke('p') to IdeaAction("Tree-selectParentNoCollapse"),
-			KeyStroke.getKeyStroke('P') to IdeaAction("Tree-selectFirst"),
 			KeyStroke.getKeyStroke('s') to SelectFirstSibling,
 			KeyStroke.getKeyStroke('S') to SelectLastSibling,
+			KeyStroke.getKeyStroke('u') to IdeaAction("Tree-selectParentNoCollapse"),
+			KeyStroke.getKeyStroke('U') to IdeaAction("Tree-selectFirst"),
 			KeyStroke.getKeyStroke('x') to CollapseChildrenToPreviousLevel,
 			KeyStroke.getKeyStroke('X') to CollapseSelf,
 			*withShiftModifier(KeyEvent.VK_B, KeyEvent.CTRL_DOWN_MASK) { ScrollVerticallyAndSelect(pages = -1.0F, extendSelection = it) },
@@ -76,7 +76,7 @@ internal object VimTreeNavigation {
 	
 	private val GIT_CHANGES_BASIC_ROOT_NODE = BASIC_ROOT_NODE + Parent(
 		mapOf(
-			KeyStroke.getKeyStroke('d') to IdeaAction("Vcs.ShowDiffWithLocal"),
+			KeyStroke.getKeyStroke('c') to IdeaAction("Vcs.ShowDiffWithLocal"),
 			KeyStroke.getKeyStroke('e') to IdeaAction("EditSource"),
 		)
 	)
@@ -89,7 +89,9 @@ internal object VimTreeNavigation {
 	
 	private val GIT_OTHER_CHANGES_ROOT_NODE = GIT_CHANGES_BASIC_ROOT_NODE + Parent(
 		mapOf(
-			KeyStroke.getKeyStroke('c') to IdeaAction("Vcs.ApplySelectedChanges"),
+			KeyStroke.getKeyStroke('d') to IdeaAction("Git.Drop.Selected.Changes"),
+			KeyStroke.getKeyStroke('e') to IdeaAction("Git.InMemory.Extract.Selected.Changes"),
+			KeyStroke.getKeyStroke('p') to IdeaAction("Vcs.ApplySelectedChanges"),
 			KeyStroke.getKeyStroke('r') to IdeaAction("Vcs.RevertSelectedChanges"),
 		)
 	)
