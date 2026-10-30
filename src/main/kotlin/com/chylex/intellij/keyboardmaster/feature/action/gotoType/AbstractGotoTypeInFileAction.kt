@@ -25,8 +25,8 @@ abstract class AbstractGotoTypeInFileAction : BaseCodeInsightAction(), DumbAware
 	private companion object {
 		fun checkValidForFile(file: PsiFile): Boolean {
 			return try {
-				LanguageStructureViewBuilder.INSTANCE.getStructureViewBuilder(file) is TreeBasedStructureViewBuilder
-			} catch (e: IndexNotReadyException) {
+				LanguageStructureViewBuilder.getInstance().getStructureViewBuilder(file) is TreeBasedStructureViewBuilder
+			} catch (_: IndexNotReadyException) {
 				false
 			}
 		}

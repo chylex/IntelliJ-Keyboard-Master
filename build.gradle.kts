@@ -19,12 +19,13 @@ repositories {
 dependencies {
 	intellijPlatform {
 		@Suppress("DEPRECATION")
-		intellijIdeaUltimate("2024.2")
+		intellijIdeaUltimate("2026.2")
 		
 		bundledModule("intellij.platform.vcs.impl")
 		bundledModule("intellij.platform.vcs.log.impl")
 		
 		bundledPlugin("com.intellij.java")
+		bundledPlugin("Git4Idea")
 		
 		compatiblePlugin("com.intellij.classic.ui")
 		
@@ -32,8 +33,6 @@ dependencies {
 			plugin("IdeaVIM", "2.10.2")
 		}
 	}
-	
-	testImplementation("org.junit.jupiter:junit-jupiter:5.11.0-M1")
 }
 
 intellijPlatform {
@@ -46,8 +45,6 @@ intellijPlatform {
 }
 
 kotlin {
-	jvmToolchain(21)
-	
 	compilerOptions {
 		freeCompilerArgs = listOf(
 			"-X" + "jvm-default=all",

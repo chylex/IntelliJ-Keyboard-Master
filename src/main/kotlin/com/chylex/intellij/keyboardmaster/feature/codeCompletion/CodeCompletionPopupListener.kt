@@ -63,8 +63,8 @@ class CodeCompletionPopupListener : LookupManagerListener {
 				return presentation
 			}
 			
-			override fun customizeEmptyIcon(icon: Icon): Icon {
-				return icon
+			override fun customizeEmptyIcon(emptyIcon: Icon): Icon {
+				return emptyIcon
 			}
 		})
 	}
