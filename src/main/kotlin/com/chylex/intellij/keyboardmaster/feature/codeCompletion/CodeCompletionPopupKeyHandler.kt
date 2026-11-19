@@ -67,9 +67,8 @@ class CodeCompletionPopupKeyHandler private constructor(originalHandler: TypedAc
 		val newTopIndex = getNewTopIndex(list.model)
 		
 		CodeCompletionPopupListener.setPageOffset(lookup, newTopIndex)
-		lookup.selectedIndex = newTopIndex
+		selectIndex(lookup, newTopIndex)
 		ScrollingUtil.ensureRangeIsVisible(list, newTopIndex, newTopIndex + CodeCompletionPopupConfiguration.itemShortcutCount - 1)
-		lookup.markSelectionTouched()
 		lookup.refreshUi(false, true)
 	}
 	
@@ -79,6 +78,11 @@ class CodeCompletionPopupKeyHandler private constructor(originalHandler: TypedAc
 			lookup.refreshUi(false, true)
 		}
 		
+		selectIndex(lookup, index)
+	}
+	
+	private fun selectIndex(lookup: LookupImpl, index: Int) {
 		lookup.selectedIndex = index
+		lookup.markSelectionTouched()
 	}
 }
